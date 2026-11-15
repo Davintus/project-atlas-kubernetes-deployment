@@ -63,7 +63,7 @@ These checks validate Helm packaging and Kubernetes release lifecycle. They do *
 
 ## 7. Remaining integration milestone
 
-The reviewed historical Mifos frontend distribution has now been imported under `frontend/` on the private portfolio branch. Its archive fingerprint and expected paths were checked before extraction, and the generated runtime `env.js` is deliberately excluded from source control.
+The reviewed historical Mifos frontend distribution has now been imported under `frontend/` on the private portfolio branch. Its archive fingerprint and expected paths were checked before extraction, and the generated runtime `env.js` is deliberately excluded from source control. The frontend validator passed (409 files, 34,643,965 bytes), the `mifos-web:local` image built successfully, and a disposable container returned HTTP 200 from NGINX while generating the runtime configuration. The optional browser-side API-key fields were confirmed empty. This is a static frontend/container smoke test only; it does not verify Fineract API communication.
 
 The remaining work is to:
 
