@@ -14,7 +14,7 @@ This repository is a public-facing portfolio project prepared from work performe
 
 ## Safe alternatives
 
-- Use clearly marked placeholders such as <CLOUD_PROJECT_ID>, <REGION>, <REGISTRY>, <APP_DOMAIN> and <DATABASE_HOST>.
+- Use clearly marked placeholders such as `CLOUD_PROJECT_ID`, `REGION`, `REGISTRY`, `APP_DOMAIN` and `DATABASE_HOST`.
 - Use Kubernetes Secret references and document the expected Secret keys without publishing values.
 - Provide example values files containing non-sensitive demo values only.
 - Draw logical architecture diagrams with generic component names.
