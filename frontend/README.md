@@ -1,6 +1,6 @@
 # Mifos frontend distribution
 
-The original static Mifos frontend distribution has been supplied and reviewed separately. Its source checkout is:
+The historical Mifos static frontend distribution has been supplied and reviewed. Its source checkout is:
 
 - Repository: https://github.com/openMF/web-app
 - Commit: `4f5be2d5040e37ae26adef023c610028cbf34343`
@@ -8,34 +8,39 @@ The original static Mifos frontend distribution has been supplied and reviewed s
 - Package version: `1.0.0`
 - Licence: MPL-2.0
 
-The reviewed archive contained 468 files (approximately 34.6 MB uncompressed), including `index.html` and `assets/env.template.js`. It did not contain the generated `assets/env.js`. The archive SHA-256 is recorded in [build provenance](../docs/build-provenance.md).
+The archive contains 468 files (approximately 34.6 MB uncompressed), including `index.html` and `assets/env.template.js`. It does not contain the generated `assets/env.js`. Its SHA-256 is recorded in [build provenance](../docs/build-provenance.md).
 
-**Import status:** the archive contents have not yet been committed to this GitHub branch. The static files must be transferred into this directory from the reviewed archive before `scripts/build-mifos-image.sh` can build the real frontend image.
+**Import status:** the static files have not yet been committed to this GitHub branch. The checksum-verified import script checks the exact reviewed archive before extraction.
 
 ## Import on a Git-enabled workspace
 
-From a clean clone of this branch, place the reviewed archive next to the repository root and run:
+Clone the private Project Atlas branch, copy the supplied archive onto that workspace, and run:
 
 ~~~bash
-sha256sum mifos-frontend-review.tar.gz
-# Confirm the result matches the SHA-256 in docs/build-provenance.md.
+git clone --branch docs/sanitised-project-baseline \
+  git@github.com:Davintus/project-atlas-kubernetes-deployment.git
+cd project-atlas-kubernetes-deployment
 
-tar -xzf mifos-frontend-review.tar.gz -C .
-bash scripts/validate-mifos-frontend.sh frontend
+bash scripts/import-mifos-frontend.sh /path/to/mifos-frontend-review.tar.gz
+~~~
 
-git status --short
-git diff --check
+The archive has a top-level `frontend/` directory, so the import script extracts it at the repository root. The script verifies the SHA-256 and archive paths, then runs the frontend validation script.
+
+Review the staged/untracked files. The import script does not commit or push automatically:
+
+~~~bash
+git status --short -- frontend/
 git add frontend/
+git diff --cached --stat
+git diff --cached --check
 git commit -m "Add reviewed Mifos frontend distribution"
 git push origin docs/sanitised-project-baseline
 ~~~
-
-The archive already has a top-level `frontend/` directory, so extract it at the repository root. Review the staged file list before committing.
 
 ## Runtime configuration
 
 The container entrypoint generates `assets/env.js` from `assets/env.template.js` when the container starts. The generated file is environment-specific and must never be committed.
 
-The frontend template contains browser-visible API-key properties for optional integrations. The container deliberately forces those key values to empty and disables the associated integrations by default. **Do not configure confidential API keys in frontend environment variables:** values written to `env.js` are visible to every user who can load the web application. Use a trusted backend proxy where an integration requires a confidential key.
+The frontend template includes browser-visible API-key properties for optional integrations. The entrypoint deliberately forces both API-key properties to empty and keeps those integrations disabled by default. **Do not configure confidential API keys in frontend environment variables:** values written to `env.js` are visible to every user who can load the web application. Use an approved trusted backend proxy for integrations requiring confidential keys.
 
 The bundled TinyMCE licence and notice files must remain with the distribution.
