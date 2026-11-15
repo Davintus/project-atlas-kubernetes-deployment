@@ -61,24 +61,23 @@ GitHub Actions has passed chart linting and template rendering for the default, 
 
 These checks validate Helm packaging and Kubernetes release lifecycle. They do **not** yet prove that the actual Fineract and Mifos images can run together against MariaDB.
 
-## 7. Remaining integration milestone
+## 7. Validate the real application images together on the project VM
 
-The reviewed historical Mifos frontend distribution has now been imported under `frontend/` on the private portfolio branch. Its archive fingerprint and expected paths were checked before extraction, and the generated runtime `env.js` is deliberately excluded from source control. The frontend validator passed (409 files, 34,643,965 bytes), the `mifos-web:local` image built successfully, and a disposable container returned HTTP 200 from NGINX while generating the runtime configuration. The optional browser-side API-key fields were confirmed empty. This is a static frontend/container smoke test only; it does not verify Fineract API communication.
+After the static frontend and API images were built and inspected, a disposable integration stack was created on the project VM on 15 November 2026. The stack used the actual `fineract-api:local` and `mifos-web:local` images, a separate MariaDB 12.2.2 container, a dedicated Docker volume and an isolated Docker network. MariaDB had no published host port. Random test passwords were held in mode-600 temporary files outside the repository, and the application database user was limited to the two Fineract test databases.
 
-The pinned Fineract API image has also now been rebuilt locally. The script checked out the recorded full source SHA, built with Temurin 25.0.5 and Gradle 9.7.1, produced `fineract-api:local`, and verified that MariaDB Connector/J 3.5.7 and its runtime classpath entry were present inside the image. The Gradle build completed successfully in 7 minutes 28 seconds. The image has not yet been started against a database or validated through a real API health check.
+The initial database bootstrap completed successfully. The default tenant database contained 283 tables, and the tenant-store database contained 6 tables. Fineract connected to the default tenant database and its health endpoint returned HTTP 200 with status `UP`. Logs showed the default tenant connection pool starting successfully. An authenticated request to `/fineract-provider/api/v1/offices` returned HTTP 200 with the `Head Office` record.
 
-Both local images were then inspected as Linux/AMD64 images. The Fineract image is approximately 299 MB and its bundled Zulu runtime reports Java 25.0.5.0.3; the Mifos image is approximately 40 MB. The Fineract check invoked the image's Java executable with `-version` only. Application startup and database connectivity remain to be tested.
+The Mifos NGINX container served the frontend with HTTP 200 and generated `assets/env.js` at startup. The 4,315-byte runtime file was itself served with HTTP 200 and contained the expected API base URL, API provider path and `default` tenant value. A container-network probe from Mifos to the Fineract health endpoint returned HTTP 200. After aligning the NGINX upstream with Fineract's internal HTTP listener and recreating the Mifos container so it used the updated bind-mounted configuration, an authenticated offices API request through the Mifos NGINX reverse proxy returned HTTP 200 and the same Head Office record. At the last inspection, both application containers were running with zero restarts.
 
-The remaining work is to:
+This verifies real-image application startup, MariaDB connectivity, Mifos static delivery, runtime configuration and authenticated API connectivity through the frontend reverse proxy. It is stronger than the earlier image-only and fixture-only tests.
 
-1. run the frontend validator and build/smoke-test the actual Mifos NGINX image;
-2. prepare an isolated MariaDB instance with synthetic tenant data and the required Fineract bootstrap configuration;
-3. build the pinned Fineract API image and the imported Mifos frontend image;
-4. install both real application images with the Helm chart into a disposable Kubernetes cluster;
-5. verify Fineract startup, tenant upgrade, API health and Mifos-to-API connectivity; and
-6. test Helm upgrade and rollback with the real application workloads.
+## 8. Remaining validation and release boundaries
 
-The Mifos frontend source line is tagged for Fineract 1.14, whereas the Kubernetes API image is based on a Fineract 1.16.1-derived revision. Their compatibility must be demonstrated by the real-app integration test. The private portfolio branch is not ready for public release until the third-party licence, permission and disclosure reviews are complete.
+The workstation-to-VM SSH port-forwarding attempt did not establish a local browser connection. Therefore, an interactive Mifos browser login, dashboard rendering and complete user workflow were **not verified**. This is a limitation of the browser access path in this test, not evidence that the API proxy failed: the authenticated offices request through the proxy returned HTTP 200 from the VM. The VM-side integration objective—real application startup and authenticated API communication through the frontend proxy—has been met, but the work should not be described as a fully browser-accepted Mifos deployment.
+
+The Mifos frontend source line is tagged for Fineract 1.14, whereas the Kubernetes API image is based on a Fineract 1.16.1-derived revision. The offices endpoint passed, but broad API/UI compatibility has not been established. The real application images have not yet been installed together through the Helm chart in a disposable Kubernetes cluster; the existing Kind chart test still uses BusyBox and NGINX fixtures. No formal load, penetration, disaster-recovery or long-duration resilience tests are claimed.
+
+The private portfolio branch remains private pending the third-party licence, permission, security and disclosure reviews. The original VM Compose environment has not been imported because its environment and tenant bootstrap files have not been sanitised.
 
 ## Lessons
 
