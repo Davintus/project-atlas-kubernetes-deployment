@@ -5,7 +5,7 @@
 The Fineract API builder reproduces the successful image-build approach: Apache Fineract source at a reviewed ref, Temurin JDK 25.0.5, Gradle 9.7.1, MariaDB Connector/J 3.5.7 added to the Jib image classpath, and image verification.
 
 ~~~bash
-export FINERACT_SOURCE_REF=<reviewed-tag-or-commit>
+export FINERACT_SOURCE_REF=vX.Y.Z-or-commit-sha
 export FINERACT_IMAGE_NAME=fineract-api
 export FINERACT_IMAGE_TAG=local
 
