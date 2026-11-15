@@ -1,6 +1,6 @@
 # Contributing to Project Atlas
 
-Thank you for helping improve Project Atlas.
+Thank you for helping improve Project Atlas. See [release readiness](docs/release-readiness.md) for the current licensing, security and disclosure gates.
 
 Project Atlas is a sanitised engineering reference for Apache Fineract, Mifos, container builds, Kubernetes manifests, CI/CD and deployment automation. Contributions that make the examples more accurate, secure, reproducible and easier to maintain are welcome.
 
