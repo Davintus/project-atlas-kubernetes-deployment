@@ -135,11 +135,11 @@ Manual source correlation against the exact pinned Mifos revision established th
 
 A single fingerprint-specific exception was added to `.gitleaksignore` for this exact commit/file/rule/line. No rule-wide or path-wide suppression was added. This false positive is now documented and narrowly suppressed.
 
-**Verified result on the current review commit `5cd6a6239ef2a45bebf2348b8d50a86e67f50ce6`:**
-- [Push all-refs Gitleaks scan #21](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728669543) — passed.
-- [PR all-refs Gitleaks scan #22](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728674494) — passed.
-- [Latest Helm/Kubernetes PR run #73](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728674509) — passed.
-- [Latest Mifos frontend PR run #35](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728674520) — passed.
+**Verified result on the current review commit `89ead7006bb1f37be5800727edd9b6ddf3773e24`:**
+- [Push all-refs Gitleaks scan #23](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728784309) — passed.
+- [PR all-refs Gitleaks scan #24](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728789379) — passed.
+- [Push Helm/Kubernetes run #74](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728784416) and [PR run #75](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728789266) — passed.
+- [Push Mifos frontend run #36](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728784399) and [PR run #37](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728789366) — passed.
 
 See [the source mapping in the pinned Mifos environment file](https://github.com/openMF/web-app/blob/4f5be2d5040e37ae26adef023c610028cbf34343/src/environments/environment.ts), [the sanitised frontend entrypoint](../nginx/docker-entrypoint.sh), and the [narrow ignore entry](../.gitleaksignore).
 
