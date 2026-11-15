@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fineract-api
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - fineract.example.invalid
+      secretName: fineract-api-prod-tls
+  rules:
+    - host: fineract.example.invalid
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fineract-api
+                port:
+                  number: 8443
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mifos-web
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - mifos.example.invalid
+      secretName: mifos-web-prod-tls
+  rules:
+    - host: mifos.example.invalid
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mifos-web
+                port:
+                  number: 80
