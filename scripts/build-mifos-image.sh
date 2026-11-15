@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-IMAGE_NAME="\${MIFOS_IMAGE_NAME:-mifos-web}"
-IMAGE_TAG="\${MIFOS_IMAGE_TAG:-local}"
-IMAGE="\${IMAGE_NAME}:\${IMAGE_TAG}"
+IMAGE_NAME="${MIFOS_IMAGE_NAME:-mifos-web}"
+IMAGE_TAG="${MIFOS_IMAGE_TAG:-local}"
+IMAGE="${IMAGE_NAME}:${IMAGE_TAG}"
 
 test -s frontend/index.html || {
   echo "frontend/index.html is missing. Import the reviewed Mifos web distribution into frontend/." >&2
