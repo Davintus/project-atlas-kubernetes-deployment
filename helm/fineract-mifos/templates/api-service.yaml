@@ -1,0 +1,18 @@
+{{- if .Values.api.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "fineract-mifos.apiName" . }}
+  labels:
+    {{- include "fineract-mifos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  type: {{ .Values.api.service.type }}
+  selector:
+    {{- include "fineract-mifos.apiSelectorLabels" . | nindent 4 }}
+  ports:
+    - name: https
+      port: {{ .Values.api.service.port }}
+      targetPort: https
+      protocol: TCP
+{{- end }}
