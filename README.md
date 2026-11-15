@@ -52,7 +52,7 @@ The repository now includes the sanitised application build and deployment scaff
 - [Kubernetes base manifests](k8s/base/) and [environment overlays](k8s/overlays/) — retain the two Deployments, two Services, MariaDB Secret contract, ingress and namespace layout.
 - [VM baseline notes](vm-baseline/README.md) — explain the earlier Docker Compose troubleshooting stage.
 
-**Important outstanding source import:** the original private repository contained the 35 MB Mifos static frontend distribution. That exact distribution is not in this repository yet because its source revision and redistribution permission have not been confirmed. Place the reviewed distribution in frontend/ before building the frontend image. This repository also does not yet include a complete executable VM Compose environment because its original environment and tenant bootstrap files have not been imported and sanitised.
+**Important outstanding source import:** the 35 MB Mifos static frontend distribution has now been reviewed, and its upstream source commit and MPL-2.0 licence have been identified. The static files are not yet committed to this repository. Use [the checksum-verified frontend import script](scripts/import-mifos-frontend.sh) to import the reviewed archive. A full third-party licence and disclosure review is still required before a public release. This repository also does not yet include a complete executable VM Compose environment because its original environment and tenant bootstrap files have not been imported and sanitised.
 
 ## Helm chart
 
