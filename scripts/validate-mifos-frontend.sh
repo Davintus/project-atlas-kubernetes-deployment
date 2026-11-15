@@ -30,11 +30,11 @@ if [[ -n "$unsafe_file" ]]; then
   exit 1
 fi
 
-grep -Fq 'Mozilla Public' "$FRONTEND_DIR/assets/env.template.js" && \\
-  grep -Fq 'License, v. 2.0' "$FRONTEND_DIR/assets/env.template.js" || {
+if ! grep -Fq 'Mozilla Public' "$FRONTEND_DIR/assets/env.template.js" ||
+   ! grep -Fq 'License, v. 2.0' "$FRONTEND_DIR/assets/env.template.js"; then
   echo "ERROR: expected Mifos MPL licence header was not found in env.template.js." >&2
   exit 1
-}
+fi
 
 if [[ ! -s "$FRONTEND_DIR/assets/tinymce/license.md" || ! -s "$FRONTEND_DIR/assets/tinymce/notices.txt" ]]; then
   echo "ERROR: bundled TinyMCE licence/notice files are missing." >&2
