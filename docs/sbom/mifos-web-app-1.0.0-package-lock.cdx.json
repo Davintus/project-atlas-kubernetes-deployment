@@ -4,7 +4,7 @@
   "serialNumber": "urn:uuid:6f7f6b60-5525-4b48-9b6e-4edb3e2a2026",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-11-15T15:05:56.401Z",
+    "timestamp": "2026-11-15T15:06:47.511Z",
     "tools": {
       "components": [
         {
@@ -48,7 +48,7 @@
         },
         {
           "name": "sbom:scope",
-          "value": "All npm lockfile packages, including development and optional dependencies; not a complete static-asset or container SBOM."
+          "value": "All locked npm packages, including development and optional dependencies. Not a complete inventory of generated assets, fonts, logos, images or all license texts."
         }
       ]
     }
@@ -26724,8 +26724,12 @@
           "value": "node_modules/exit"
         },
         {
-          "name": "license:declared",
-          "value": "missing from pinned package-lock metadata"
+          "name": "license:lockfile-declaration",
+          "value": "absent"
+        },
+        {
+          "name": "license:manual-review-note",
+          "value": "Package README explicitly states MIT; lockfile entry omits license."
         },
         {
           "name": "npm:dev",
@@ -26734,8 +26738,20 @@
       ],
       "externalReferences": [
         {
+          "type": "other",
+          "url": "https://github.com/cowboy/node-exit/blob/master/LICENSE-MIT",
+          "comment": "License evidence for package version in pinned source lockfile."
+        },
+        {
           "type": "distribution",
           "url": "https://registry.npmjs.org/exit/-/exit-0.1.2.tgz"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
         }
       ]
     },
@@ -46433,8 +46449,12 @@
           "value": "node_modules/svg-tags"
         },
         {
-          "name": "license:declared",
-          "value": "missing from pinned package-lock metadata"
+          "name": "license:lockfile-declaration",
+          "value": "absent"
+        },
+        {
+          "name": "license:manual-review-note",
+          "value": "Upstream package LICENSE is MIT; lockfile entry omits license."
         },
         {
           "name": "npm:dev",
@@ -46443,8 +46463,20 @@
       ],
       "externalReferences": [
         {
+          "type": "other",
+          "url": "https://github.com/element-io/svg-tags/blob/master/LICENSE",
+          "comment": "License evidence for package version in pinned source lockfile."
+        },
+        {
           "type": "distribution",
           "url": "https://registry.npmjs.org/svg-tags/-/svg-tags-1.0.0.tgz"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "MIT"
+          }
         }
       ]
     },
