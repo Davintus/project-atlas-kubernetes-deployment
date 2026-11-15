@@ -2,10 +2,10 @@
 set -Eeuo pipefail
 
 # Rebuild the Fineract API image using the same build shape used by the
-# successful deployment pipeline. Pin FINERACT_SOURCE_REF to a reviewed
-# Apache Fineract tag or commit for reproducible builds.
+# successful Kubernetes image build. This is the exact source commit
+# recorded by the successful Bitbucket pipeline; override only deliberately.
 
-: "${FINERACT_SOURCE_REF:?Set FINERACT_SOURCE_REF to a reviewed Apache Fineract tag or commit}"
+FINERACT_SOURCE_REF="${FINERACT_SOURCE_REF:-d63beed7ccfeadaffa0c7842b1011bc88451376f}"
 
 JAVA_REQUIRED="25.0.5"
 GRADLE_VERSION="9.7.1"
