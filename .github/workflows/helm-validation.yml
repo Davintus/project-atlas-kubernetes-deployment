@@ -9,6 +9,10 @@ on:
       - "k8s/**"
       - "scripts/**"
       - "nginx/**"
+      - "frontend/**"
+      - "scripts/validate-mifos-frontend.sh"
+      - "frontend/**"
+      - "scripts/validate-mifos-frontend.sh"
       - "Dockerfile.mifos"
       - ".github/workflows/helm-validation.yml"
       - ".github/workflows/helm-kind-smoke.yml"
@@ -56,6 +60,32 @@ jobs:
             kubectl kustomize "k8s/overlays/$overlay" > "/tmp/$overlay-rendered.yaml"
             test -s "/tmp/$overlay-rendered.yaml"
           done
+
+      - name: Build and smoke-test Mifos frontend when distribution is present
+        run: |
+          if [ ! -s frontend/index.html ]; then
+            echo "Historical Mifos distribution is not yet imported; skipping image build."
+            exit 0
+          fi
+
+          bash scripts/validate-mifos-frontend.sh frontend
+          docker build --pull -f Dockerfile.mifos -t project-atlas/mifos-web:ci .
+          docker run -d --name project-atlas-mifos-ci -p 127.0.0.1:18080:8080 project-atlas/mifos-web:ci
+
+          cleanup() { docker rm -f project-atlas-mifos-ci >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:18080/ >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+
+          curl --fail --silent http://127.0.0.1:18080/ >/dev/null
+          docker exec project-atlas-mifos-ci test -s /usr/share/nginx/html/assets/env.js
+          docker exec project-atlas-mifos-ci sh -c '! grep -Eq "\\$[A-Z][A-Z0-9_]*" /usr/share/nginx/html/assets/env.js'
+          docker exec project-atlas-mifos-ci sh -c 'grep -Fq "https://fineract.example.invalid" /usr/share/nginx/html/assets/env.js'
 
       - name: Lint chart
         run: helm lint helm/fineract-mifos
