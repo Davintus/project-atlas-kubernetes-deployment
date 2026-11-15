@@ -12,8 +12,12 @@ on:
       - "scripts/import-mifos-frontend.sh"
       - "nginx/**"
       - "Dockerfile.mifos"
-      - ".github/workflows/mifos-frontend-validation.yml"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
       - ".github/workflows/helm-validation.yml"
+      - ".github/workflows/mifos-frontend-validation.yml"
+      - ".github/workflows/helm-kind-smoke.yml"
   pull_request:
     paths:
       - "frontend/**"
@@ -22,8 +26,12 @@ on:
       - "scripts/import-mifos-frontend.sh"
       - "nginx/**"
       - "Dockerfile.mifos"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
+      - ".github/workflows/helm-validation.yml"
       - ".github/workflows/mifos-frontend-validation.yml"
-
+      - ".github/workflows/helm-kind-smoke.yml"
   workflow_dispatch:
 
 permissions:
