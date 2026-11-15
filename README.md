@@ -48,7 +48,8 @@ The diagram is intentionally logical. It does not disclose the original network 
 The repository now includes the sanitised application build and deployment scaffolding that preceded Helm:
 
 - [Fineract Jib build script](scripts/build-fineract-image.sh) — rebuilds Apache Fineract from a reviewed source ref, adds MariaDB Connector/J 3.5.7 to the Jib runtime classpath, and checks the resulting image.
-- [Mifos frontend Dockerfile](Dockerfile.mifos) and [NGINX configuration](nginx/) — recreates the static frontend container and runtime API URL substitution.
+- [Mifos frontend Dockerfile](Dockerfile.mifos) and [NGINX configuration](nginx/) — package the reviewed static frontend and generate runtime API configuration.
+- [Frontend import script](scripts/import-mifos-frontend.sh) — verify the reviewed archive fingerprint, validate its paths and import the static assets.
 - [Kubernetes base manifests](k8s/base/) and [environment overlays](k8s/overlays/) — retain the two Deployments, two Services, MariaDB Secret contract, ingress and namespace layout.
 - [VM baseline notes](vm-baseline/README.md) — explain the earlier Docker Compose troubleshooting stage.
 
