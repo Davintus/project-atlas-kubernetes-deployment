@@ -43,15 +43,29 @@ The diagram is intentionally logical. It does not disclose the original network 
 - NGINX Ingress and TLS
 - MariaDB
 
+## Application build and pre-Helm deployment
+
+The repository now includes the sanitised application build and deployment scaffolding that preceded Helm:
+
+- [Fineract Jib build script](scripts/build-fineract-image.sh) — rebuilds Apache Fineract from a reviewed source ref, adds MariaDB Connector/J 3.5.7 to the Jib runtime classpath, and checks the resulting image.
+- [Mifos frontend Dockerfile](Dockerfile.mifos) and [NGINX configuration](nginx/) — recreates the static frontend container and runtime API URL substitution.
+- [Kubernetes base manifests](k8s/base/) and [environment overlays](k8s/overlays/) — retain the two Deployments, two Services, MariaDB Secret contract, ingress and namespace layout.
+- [VM baseline notes](vm-baseline/README.md) — explain the earlier Docker Compose troubleshooting stage.
+
+**Important outstanding source import:** the original private repository contained the 35 MB Mifos static frontend distribution. That exact distribution is not in this repository yet because its source revision and redistribution permission have not been confirmed. Place the reviewed distribution in frontend/ before building the frontend image. This repository also does not yet include a complete executable VM Compose environment because its original environment and tenant bootstrap files have not been imported and sanitised.
+
 ## Helm chart
 
-An initial reusable Helm chart is now included at [helm/fineract-mifos](helm/fineract-mifos). It templates the Fineract API and Mifos frontend deployments and services, uses an existing Kubernetes Secret for database connection settings, and supports optional Ingress resources with independent TLS configuration.
+The initial reusable Helm chart is at [helm/fineract-mifos](helm/fineract-mifos). It templates the Fineract API and Mifos frontend Deployments and Services, consumes a pre-created Kubernetes Secret for database settings, and supports optional Ingress resources with separate TLS configuration.
 
-The chart uses example-only image repositories, hostnames and Secret names. It is **not approved for production installation**. The GitHub Actions workflow runs Helm lint and template rendering for the default, development, staging and production-example values. A disposable-cluster installation and upgrade/rollback test is still required before considering the chart validated for a real environment.
+The chart uses example-only images, hostnames and Secret names. It is **not approved for production installation**. GitHub Actions validates chart lint/rendering and runs an isolated kind-based smoke test using disposable BusyBox/NGINX test containers. That smoke test validates Helm installation, in-cluster Service connectivity, upgrade and rollback; it does not run the real Fineract application or prove MariaDB integration.
 
 See:
 - [Deployment journey](docs/deployment-journey.md)
+- [VM baseline](vm-baseline/README.md)
 - [Architecture notes](docs/architecture.md)
+- [Upstream source provenance](docs/upstream-components.md)
+- [Kustomize deployment](k8s/README.md)
 - [Security and sanitisation rules](docs/security-and-disclosure.md)
 - [Helm chart documentation](helm/README.md)
 
