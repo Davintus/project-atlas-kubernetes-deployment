@@ -38,7 +38,7 @@ The following items are known from the repository's current provenance and retai
 
 ### 1. Open-source licensing and attribution
 - [ ] Produce a complete SBOM/licence inventory for application dependencies, bundled JavaScript, fonts, icons, images and other assets.
-- [ ] Resolve the TinyMCE licence position and retain evidence of GPL compliance or applicable commercial permission.
+- [ ] Resolve TinyMCE 8.3.2's GPLv2+ versus commercial self-hosted licence position; inspect the Mifos configuration and ensure the self-hosted licence-key setup matches the selected terms. Retain evidence of GPL compliance or applicable commercial permission.
 - [ ] Confirm Apache Fineract, Mifos/MPL-2.0, TinyMCE and other third-party notices are complete and placed where recipients can find them.
 - [ ] Check source-code availability and corresponding-source obligations for any executable or bundled distribution.
 - [ ] Decide the licence (if any) for original Project Atlas material without purporting to relicense third-party content.
@@ -69,6 +69,6 @@ The following items are known from the repository's current provenance and retai
 
 ## Who can close the remaining gates
 
-Technical validation and documentation can be checked in this project. Licensing interpretation, commercial entitlement, customer/employer disclosure permission and trademark approval require confirmation from the relevant rights-holders and/or qualified legal reviewers. No such approval is inferred from the presence of an upstream licence file.
+Technical validation and documentation can be checked in this project. Licensing interpretation, commercial entitlement, customer/employer disclosure permission and trademark approval require confirmation from the relevant rights-holders and/or qualified legal reviewers. No such approval is inferred from the presence of an upstream licence file. See the [official MPL-2.0 text](https://www.mozilla.org/en-US/MPL/2.0/), the [Apache License 2.0 text](https://www.apache.org/licenses/LICENSE-2.0.html), and Tiny's [legal documents](https://www.tiny.cloud/legal/) and [licence-key documentation](https://www.tiny.cloud/docs/tinymce/latest/license-key/) as primary reference material; these references do not replace a review of the actual files, agreements and intended distribution.
 
 Until all applicable boxes above are completed and recorded, keep the repository private. Existing collaborators with repository access can continue contributing under the safeguards in [CONTRIBUTING.md](../CONTRIBUTING.md).
