@@ -78,7 +78,7 @@ GRADLE
 WRAPPER_FILE="$SOURCE_DIR/gradle/wrapper/gradle-wrapper.properties"
 test -f "$WRAPPER_FILE"
 sed -i \
-  "s#^distributionUrl=.*#distributionUrl=https\\\\://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip#" \
+  "s#^distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip#" \
   "$WRAPPER_FILE"
 
 cd "$SOURCE_DIR"
@@ -97,6 +97,7 @@ echo "Building ${JIB_IMAGE}..."
 docker image inspect "$JIB_IMAGE" >/dev/null
 IMAGE_CONTAINER="$(docker create "$JIB_IMAGE")"
 cleanup_container() { docker rm -f "$IMAGE_CONTAINER" >/dev/null 2>&1 || true; }
+trap 'cleanup_container; cleanup' EXIT
 docker cp "${IMAGE_CONTAINER}:/app/libs/${MARIADB_JAR}" "$BUILD_ROOT/$MARIADB_JAR"
 docker cp "${IMAGE_CONTAINER}:/app/jib-classpath-file" "$BUILD_ROOT/jib-classpath-file"
 test -s "$BUILD_ROOT/$MARIADB_JAR"
