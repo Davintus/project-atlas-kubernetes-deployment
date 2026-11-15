@@ -93,16 +93,17 @@ See:
 
 The GitHub Actions history is recorded with its test boundaries:
 
-- Historical combined workflow run **#32** passed Helm lint and template rendering. At that earlier commit the frontend distribution was not present, so frontend checks were skipped.
-- Historical combined workflow runs **#33–#42** failed because `frontend/assets/env.template.js` was missing from the Git checkout. The failing step prevented the later frontend image and Helm checks from running in those attempts.
-- The release-review branch adds the sanitised runtime template and separates the checks into two independent workflows.
-- The Kubernetes/Helm validation workflow passed on the release-review branch and again on the draft PR head (**#51**): it rendered the development, staging and production Kustomize overlays, linted the chart and rendered its default, development, staging and production-example values. This was validation only; it did not install the real Fineract or Mifos images.
-- The Mifos frontend workflow also passed on the release-review branch and draft PR head (**#9**): it validated the tracked frontend distribution, built the image, and smoke-tested HTTP delivery and generated runtime configuration.
-- A separate Kind workflow previously passed using BusyBox and NGINX fixtures. That proves chart installation, Service reachability, upgrade and rollback mechanics with fixtures only.
+- Historical combined workflow run **#32** passed Helm lint and template rendering before the frontend distribution was present; frontend checks were skipped at that time.
+- Combined workflow runs **#33–#42** failed because `frontend/assets/env.template.js` was missing from the Git checkout. Those runs stopped before the frontend image build and later Helm checks.
+- During the subsequent split of the combined workflow, two temporary trigger-definition failures occurred in runs **#44–#45**. The duplicate workflow-dispatch declaration was corrected, and subsequent independent workflow runs passed.
+- The release-review branch now has separate Kubernetes/Helm and Mifos frontend workflows. They run independently, so a frontend failure no longer hides the status of chart validation.
+- The Kubernetes/Helm workflow renders all three Kustomize overlays, runs `helm lint`, and renders default, development, staging and production-example chart values.
+- The Mifos workflow validates the tracked frontend distribution, builds the container image and smoke-tests HTTP delivery and generated runtime configuration.
+- The separate Kind workflow uses disposable BusyBox/NGINX fixtures to check chart installation, Service reachability, upgrade and rollback. Earlier fixture runs **#1 and #2 passed**. This is not a real Fineract/Mifos deployment through Helm.
 
-The original failure is preserved as engineering history rather than hidden: [failed run #42](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43725300686). The PR-head results are [Helm/Kubernetes run #51](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43727180769) and [Mifos frontend run #9](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43727180781). The [GitHub Actions page](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions) shows any later reruns.
+The historical frontend failure is preserved as engineering history: [failed run #42](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43725300686). Check the [GitHub Actions page](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions) for the status attached to the exact branch or pull-request commit being reviewed.
 
-These automated checks do not replace the real-image VM integration test, and the Kind fixture test must not be described as a real application Helm deployment. Both workflows should be green on the final reviewed commit before merge.
+These automated checks do not replace the real-image VM integration test. The Kind fixture test, Helm rendering checks, frontend image smoke test and real-application VM integration test are separate evidence categories and should not be conflated.
 
 ## Contributions
 
