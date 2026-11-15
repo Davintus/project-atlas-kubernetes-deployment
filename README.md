@@ -96,13 +96,13 @@ The GitHub Actions history is recorded with its test boundaries:
 - Historical combined workflow run **#32** passed Helm lint and template rendering. At that earlier commit the frontend distribution was not present, so frontend checks were skipped.
 - Historical combined workflow runs **#33–#42** failed because `frontend/assets/env.template.js` was missing from the Git checkout. The failing step prevented the later frontend image and Helm checks from running in those attempts.
 - The release-review branch adds the sanitised runtime template and separates the checks into two independent workflows.
-- The new Kubernetes/Helm validation workflow **#43 passed**: it rendered the development, staging and production Kustomize overlays, linted the chart and rendered its default, development, staging and production-example values. This was validation only; it did not install the real Fineract or Mifos images.
+- The latest Kubernetes/Helm validation workflow **#49 passed**: it rendered the development, staging and production Kustomize overlays, linted the chart and rendered its default, development, staging and production-example values. This was validation only; it did not install the real Fineract or Mifos images.
+- The latest Mifos frontend workflow **#7 passed**: it validated the tracked frontend distribution, built the image, and smoke-tested HTTP delivery and generated runtime configuration.
 - A separate Kind workflow previously passed using BusyBox and NGINX fixtures. That proves chart installation, Service reachability, upgrade and rollback mechanics with fixtures only.
-- The new Mifos frontend workflow validates the tracked frontend distribution, builds the frontend image and checks HTTP delivery and generated runtime configuration. See the current run status in [GitHub Actions](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions).
 
-The original failure is preserved as engineering history rather than hidden: [failed run #42](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43725300686). The independent Helm validation passed in [run #43](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43726826610). Frontend workflow status is recorded separately and must be green before this release-review branch is treated as CI-clean.
+The original failure is preserved as engineering history rather than hidden: [failed run #42](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43725300686). The latest independent results are [Helm/Kubernetes run #49](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43727078783) and [Mifos frontend run #7](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43727078856).
 
-These automated checks do not replace the real-image VM integration test, and the Kind fixture test must not be described as a real application Helm deployment.
+These automated checks do not replace the real-image VM integration test, and the Kind fixture test must not be described as a real application Helm deployment. Both workflows should be green on the final reviewed commit before merge.
 
 ## Contributions
 
