@@ -4,15 +4,11 @@ This chart deploys the Apache Fineract API and Mifos web frontend. MariaDB is in
 
 ## Status and safety
 
-This is an initial portfolio chart prepared from a sanitised deployment model. It has not been installed into the original cluster and must not be used against production as-is. All image references and hostnames in the defaults are example-only placeholders.
+This is an initial portfolio chart prepared from a sanitised deployment model. It has **not** been installed into the original cluster and must not be used against production as-is. All image references and hostnames in the defaults are example-only placeholders.
 
-The GitHub Actions workflow runs:
+GitHub Actions has successfully run Helm lint and rendered the default, development, staging and production-example values. A separate Kind job successfully installed the chart into a disposable cluster, waited for both test workloads, checked frontend/API Service connectivity with NGINX and BusyBox fixtures, upgraded the API replica count, and rolled the release back.
 
-- helm lint;
-- helm template using default values;
-- helm template using the development, staging and production-example values.
-
-A disposable Kubernetes installation, API/frontend connectivity check and Helm upgrade/rollback test are still required before the chart can be considered operationally validated.
+These are chart and Kubernetes lifecycle tests only. They do not run the real Fineract API, the actual Mifos frontend bundle, or a MariaDB integration test.
 
 ## Prerequisites
 

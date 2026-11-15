@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: staging
+resources:
+  - ../../base
+  - ingress.yaml
+patches:
+  - path: replicas.yaml
+  - path: frontend-api-url.yaml
+images:
+  - name: ghcr.io/example-project/fineract-api
+    newTag: staging-example
+  - name: ghcr.io/example-project/mifos-web
+    newTag: staging-example

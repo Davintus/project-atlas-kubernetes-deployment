@@ -11,6 +11,8 @@ api:
     tag: "0.0.0-example"
     pullPolicy: IfNotPresent
   containerPort: 8443
+  command: []
+  args: []
   service:
     type: ClusterIP
     port: 8443
@@ -60,6 +62,8 @@ frontend:
     tag: "0.0.0-example"
     pullPolicy: IfNotPresent
   containerPort: 8080
+  command: []
+  args: []
   service:
     type: ClusterIP
     port: 80

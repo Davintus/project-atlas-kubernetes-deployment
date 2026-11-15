@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fineract-api
+  labels:
+    app: fineract-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fineract-api
+  template:
+    metadata:
+      labels:
+        app: fineract-api
+    spec:
+      containers:
+        - name: fineract-api
+          image: ghcr.io/example-project/fineract-api:dev-example
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+          env:
+            - name: FINERACT_SERVER_SSL_ENABLED
+              value: "true"
+            - name: FINERACT_SERVER_PORT
+              value: "8443"
+            - name: FINERACT_DEFAULT_TENANTDB_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: fineract-db-credentials
+                  key: DB_HOST
+            - name: FINERACT_DEFAULT_TENANTDB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: fineract-db-credentials
+                  key: DB_PORT
+            - name: FINERACT_DEFAULT_TENANTDB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: fineract-db-credentials
+                  key: DEFAULT_DB
+            - name: FINERACT_DEFAULT_TENANTDB_IDENTIFIER
+              value: "default"
+            - name: FINERACT_DEFAULT_TENANTDB_UID
+              valueFrom:
+                secretKeyRef:
+                  name: fineract-db-credentials
+                  key: DB_USER
+            - name: FINERACT_DEFAULT_TENANTDB_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: fineract-db-credentials
+                  key: DB_PASSWORD
+            - name: FINERACT_HIKARI_JDBC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: fineract-db-credentials
+                  key: TENANTS_JDBC_URL
+            - name: FINERACT_HIKARI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: fineract-db-credentials
+                  key: DB_USER
+            - name: FINERACT_HIKARI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fineract-db-credentials
+                  key: DB_PASSWORD
+            - name: FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME
+              value: "org.mariadb.jdbc.Driver"
+          readinessProbe:
+            tcpSocket:
+              port: https
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: https
+            initialDelaySeconds: 120
+            periodSeconds: 20
+            timeoutSeconds: 1
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 3Gi

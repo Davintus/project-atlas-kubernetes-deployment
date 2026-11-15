@@ -1,23 +1,37 @@
-name: Validate Helm chart
+name: Validate Kubernetes manifests and Helm chart
 
 on:
   push:
     branches:
-      - docs/sanitised-project-baseline
+      - main
+      - release/project-atlas-final-review
     paths:
       - "helm/**"
+      - "k8s/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
       - ".github/workflows/helm-validation.yml"
+      - ".github/workflows/mifos-frontend-validation.yml"
+      - ".github/workflows/helm-kind-smoke.yml"
   pull_request:
     paths:
       - "helm/**"
+      - "k8s/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
       - ".github/workflows/helm-validation.yml"
+      - ".github/workflows/mifos-frontend-validation.yml"
+      - ".github/workflows/helm-kind-smoke.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  helm:
-    name: Lint and render chart
+  validate:
+    name: Render Kustomize and validate Helm
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -28,17 +42,41 @@ jobs:
         with:
           version: v4.3.1
 
-      - name: Lint chart
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.33.0
+
+      - name: Render Kustomize overlays
+        run: |
+          for overlay in development staging production; do
+            echo "Rendering Kustomize overlay: $overlay"
+            kubectl kustomize "k8s/overlays/$overlay" > "$RUNNER_TEMP/$overlay-rendered.yaml"
+            test -s "$RUNNER_TEMP/$overlay-rendered.yaml"
+          done
+
+      - name: Lint Helm chart
         run: helm lint helm/fineract-mifos
 
-      - name: Render default values
+      - name: Render default Helm values
         run: helm template project-atlas helm/fineract-mifos --namespace project-atlas
 
-      - name: Render development values
+      - name: Render development Helm values
         run: helm template project-atlas helm/fineract-mifos --namespace project-atlas -f helm/fineract-mifos/values/development.yaml
 
-      - name: Render staging values
+      - name: Render staging Helm values
         run: helm template project-atlas helm/fineract-mifos --namespace project-atlas -f helm/fineract-mifos/values/staging.yaml
 
-      - name: Render production example values
+      - name: Render production example Helm values
         run: helm template project-atlas helm/fineract-mifos --namespace project-atlas -f helm/fineract-mifos/values/production.example.yaml
+
+      - name: Record validation boundary
+        run: |
+          {
+            echo "## Helm validation scope"
+            echo
+            echo "- Kustomize overlays were rendered."
+            echo "- Helm lint and template rendering were executed."
+            echo "- This workflow does not install the real Fineract or Mifos application images."
+            echo "- Disposable fixture installation, upgrade and rollback are covered by the separate Kind workflow."
+          } >> "$GITHUB_STEP_SUMMARY"

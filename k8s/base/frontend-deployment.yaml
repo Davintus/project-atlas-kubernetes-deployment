@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mifos-web
+  labels:
+    app: mifos-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mifos-web
+  template:
+    metadata:
+      labels:
+        app: mifos-web
+    spec:
+      containers:
+        - name: mifos-web
+          image: ghcr.io/example-project/mifos-web:dev-example
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: FINERACT_API_URL
+              value: "https://fineract.example.invalid"
+            - name: FINERACT_API_URLS
+              value: "https://fineract.example.invalid"
+            - name: FINERACT_API_PROVIDER
+              value: "/fineract-provider/api"
+            - name: FINERACT_API_VERSION
+              value: "/v1"
+            - name: FINERACT_API_ACTUATOR
+              value: "/fineract-provider"
+            - name: FINERACT_DEFAULT_TENANT
+              value: "default"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

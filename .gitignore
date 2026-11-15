@@ -1,4 +1,7 @@
 # Environment and credentials
+frontend/assets/env.js
+frontend/assets/env.*.js
+!frontend/assets/env.template.js
 .env
 .env.*
 !.env.example

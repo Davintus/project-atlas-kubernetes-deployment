@@ -1,0 +1,111 @@
+name: Validate Mifos frontend image
+
+on:
+  push:
+    branches:
+      - main
+      - release/project-atlas-final-review
+    paths:
+      - "frontend/**"
+      - "scripts/build-mifos-image.sh"
+      - "scripts/validate-mifos-frontend.sh"
+      - "scripts/import-mifos-frontend.sh"
+      - "nginx/**"
+      - "Dockerfile.mifos"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
+      - ".github/workflows/helm-validation.yml"
+      - ".github/workflows/mifos-frontend-validation.yml"
+      - ".github/workflows/helm-kind-smoke.yml"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - "scripts/build-mifos-image.sh"
+      - "scripts/validate-mifos-frontend.sh"
+      - "scripts/import-mifos-frontend.sh"
+      - "nginx/**"
+      - "Dockerfile.mifos"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
+      - ".github/workflows/helm-validation.yml"
+      - ".github/workflows/mifos-frontend-validation.yml"
+      - ".github/workflows/helm-kind-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: Validate, build and smoke-test Mifos image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check shell syntax
+        run: |
+          bash -n scripts/build-mifos-image.sh
+          bash -n scripts/validate-mifos-frontend.sh
+          bash -n scripts/import-mifos-frontend.sh
+          sh -n nginx/docker-entrypoint.sh
+
+      - name: Validate reviewed frontend distribution
+        run: bash scripts/validate-mifos-frontend.sh frontend
+
+      - name: Build Mifos frontend image
+        run: docker build --pull -f Dockerfile.mifos -t project-atlas/mifos-web:ci .
+
+      - name: Smoke-test frontend and generated runtime configuration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          docker run -d --name project-atlas-mifos-ci \
+            -p 127.0.0.1:18080:8080 \
+            project-atlas/mifos-web:ci
+
+          cleanup() {
+            docker rm -f project-atlas-mifos-ci >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          ready=false
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:18080/ >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+
+          if [ "$ready" != "true" ]; then
+            docker logs project-atlas-mifos-ci
+            echo "Mifos frontend did not become ready." >&2
+            exit 1
+          fi
+
+          curl --fail --silent http://127.0.0.1:18080/ >/dev/null
+          curl --fail --silent http://127.0.0.1:18080/assets/env.js > "$RUNNER_TEMP/env.js"
+          docker exec project-atlas-mifos-ci test -s /usr/share/nginx/html/assets/env.js
+
+          if grep -Eq '\$[A-Z][A-Z0-9_]*' "$RUNNER_TEMP/env.js"; then
+            echo "Unresolved environment placeholders found in generated env.js." >&2
+            exit 1
+          fi
+
+          grep -Fq "https://fineract.example.invalid" "$RUNNER_TEMP/env.js"
+          grep -Fq "externalNationalIdSystemApiKey'] = '';" "$RUNNER_TEMP/env.js"
+          grep -Fq "mifosRemittanceApiClientKey'] = '';" "$RUNNER_TEMP/env.js"
+
+      - name: Record frontend validation boundary
+        run: |
+          {
+            echo "## Mifos frontend validation scope"
+            echo
+            echo "- The tracked frontend distribution and runtime template were validated."
+            echo "- The container image was built and its HTTP/runtime configuration smoke-tested."
+            echo "- This does not prove interactive browser login or full Fineract/Mifos version compatibility."
+          } >> "$GITHUB_STEP_SUMMARY"
