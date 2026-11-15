@@ -1,0 +1,17 @@
+**/.git
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/kubeconfig*
+**/secrets/**
+**/private/**
+**/build/**
+**/dist/**
+**/*.log
+**/*.sql
+**/*.sql.gz
+**/*.dump
+**/*.bak
