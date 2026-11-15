@@ -65,6 +65,7 @@ See:
 - [VM baseline](vm-baseline/README.md)
 - [Architecture notes](docs/architecture.md)
 - [Upstream source provenance](docs/upstream-components.md)
+- [Pinned build and source provenance](docs/build-provenance.md)
 - [Kustomize deployment](k8s/README.md)
 - [Security and sanitisation rules](docs/security-and-disclosure.md)
 - [Helm chart documentation](helm/README.md)
