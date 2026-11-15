@@ -53,13 +53,15 @@ Validation was performed in layers:
 
 These checks establish application and ingress reachability at the time of testing; they are not a claim of a formal load, penetration, disaster-recovery or long-duration resilience test.
 
-## 6. Package the deployment with Helm
+## 6. Package the deployment with Helm as an optional path
 
-An initial reusable Helm chart is now present in `helm/fineract-mifos`. It templates the API and frontend Deployments and Services, consumes an externally created Kubernetes Secret for database configuration, and supports optional Ingress resources with separate TLS settings.
+An initial reusable Helm chart is present in `helm/fineract-mifos`. It templates the API and frontend Deployments and Services, consumes an externally created Kubernetes Secret for database configuration, and supports optional Ingress resources with separate TLS settings.
 
-GitHub Actions has passed chart linting and template rendering for the default, development, staging and production-example values. A separate Kind smoke test installed the chart with disposable BusyBox and NGINX fixtures, verified in-cluster Service connectivity, upgraded the API replica count and rolled the release back.
+The chart is included to demonstrate one possible way to package and deploy the workloads after they have been validated. Installing the real Fineract and Mifos images through Helm is **not part of the current scope and is not currently planned**. It remains a possible follow-on exercise if the project is extended.
 
-These checks validate Helm packaging and Kubernetes release lifecycle. They do **not** yet prove that the actual Fineract and Mifos images can run together against MariaDB.
+The separate Kind smoke-test workflow completed successfully in runs #1 and #2 using disposable BusyBox and NGINX fixtures. It verified chart installation, in-cluster Service connectivity, an API replica upgrade and Helm rollback. These tests validate chart structure and Kubernetes release lifecycle only; they do not deploy the real application images or prove MariaDB integration.
+
+The combined Helm/Mifos validation workflow run #32 also completed successfully before the frontend distribution was imported; at that point the workflow intentionally skipped frontend validation and image build, while Helm lint and value rendering passed. After the frontend import, runs #33 through #42 failed in the Mifos frontend validation step because `frontend/assets/env.template.js` was missing from the GitHub checkout. The subsequent frontend image build and Helm lint/render steps were skipped. The cause was an over-broad `.gitignore` pattern (`frontend/assets/env.*.js`) that also matched the required template. A negated ignore exception has now been added, but the missing template still needs to be committed from the VM checkout before CI can pass again. The current combined workflow status must therefore be reported as failing until that file is tracked and the workflow is rerun.
 
 ## 7. Validate the real application images together on the project VM
 
@@ -75,9 +77,17 @@ This verifies real-image application startup, MariaDB connectivity, Mifos static
 
 The workstation-to-VM SSH port-forwarding attempt did not establish a local browser connection. Therefore, an interactive Mifos browser login, dashboard rendering and complete user workflow were **not verified**. This is a limitation of the browser access path in this test, not evidence that the API proxy failed: the authenticated offices request through the proxy returned HTTP 200 from the VM. The VM-side integration objective—real application startup and authenticated API communication through the frontend proxy—has been met, but the work should not be described as a fully browser-accepted Mifos deployment.
 
-The Mifos frontend source line is tagged for Fineract 1.14, whereas the Kubernetes API image is based on a Fineract 1.16.1-derived revision. The offices endpoint passed, but broad API/UI compatibility has not been established. The real application images have not yet been installed together through the Helm chart in a disposable Kubernetes cluster; the existing Kind chart test still uses BusyBox and NGINX fixtures. No formal load, penetration, disaster-recovery or long-duration resilience tests are claimed.
+The Mifos frontend source line is tagged for Fineract 1.14, whereas the Kubernetes API image is based on a Fineract 1.16.1-derived revision. The offices endpoint passed, but broad API/UI compatibility has not been established. Deploying the real application images through Helm in a disposable Kubernetes cluster is an optional future extension, not part of the current plan. No formal load, penetration, disaster-recovery or long-duration resilience tests are claimed.
 
 The private portfolio branch remains private pending the third-party licence, permission, security and disclosure reviews. The original VM Compose environment has not been imported because its environment and tenant bootstrap files have not been sanitised.
+
+## 9. CI history, known issue and contribution model
+
+On 15 November 2026, the GitHub Actions history showed ten consecutive failures in the combined validation workflow (runs #33–#42). The jobs reached shell-syntax checking and Kustomize overlay rendering successfully, then failed because `frontend/assets/env.template.js` was not present in the GitHub checkout. The Mifos image build and the later Helm lint/render steps were consequently skipped. The failure was not caused by the VM-side Fineract/Mifos integration test.
+
+The cause was traced to the `.gitignore` rule `frontend/assets/env.*.js`, which unintentionally ignored the source template as well as the generated runtime file. A specific exception has been added for `frontend/assets/env.template.js`. The template still needs to be committed from the VM checkout and the workflow rerun; until then, the latest combined CI result remains failing. The generated `frontend/assets/env.js` should remain ignored.
+
+Project Atlas is intended to be refined collaboratively. Contributors with access to the currently private repository are welcome to improve the example Helm chart, Kubernetes overlays, CI validation, security controls, documentation and synthetic test fixtures. Broader community contributions can be invited once the sanitisation, licensing, permission and disclosure reviews permit public release. Never contribute customer details, live credentials, private network information or production configuration.
 
 ## Lessons
 
