@@ -93,8 +93,14 @@ jobs:
 
           curl --fail --silent http://127.0.0.1:18080/ >/dev/null
           docker exec project-atlas-mifos-ci test -s /usr/share/nginx/html/assets/env.js
-          docker exec project-atlas-mifos-ci sh -c '! grep -Eq "\\$[A-Z][A-Z0-9_]*" /usr/share/nginx/html/assets/env.js'
-          docker exec project-atlas-mifos-ci sh -c 'grep -Fq "https://fineract.example.invalid" /usr/share/nginx/html/assets/env.js'
+          docker cp project-atlas-mifos-ci:/usr/share/nginx/html/assets/env.js "$RUNNER_TEMP/env.js"
+          if grep -Eq '\\$[A-Z][A-Z0-9_]*' "$RUNNER_TEMP/env.js"; then
+            echo "Unresolved placeholders found in generated env.js." >&2
+            exit 1
+          fi
+          grep -Fq "https://fineract.example.invalid" "$RUNNER_TEMP/env.js"
+          grep -Fq "externalNationalIdSystemApiKey'] = '';" "$RUNNER_TEMP/env.js"
+          grep -Fq "mifosRemittanceApiClientKey'] = '';" "$RUNNER_TEMP/env.js"
 
       - name: Lint chart
         run: helm lint helm/fineract-mifos
