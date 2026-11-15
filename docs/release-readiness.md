@@ -124,17 +124,18 @@ If permission cannot be obtained, remove or rewrite the material to an independe
 
 ## 4. Secret and Git history scan
 
-A new Gitleaks workflow was added. It checks the current push/PR change range and separately scans the commit history reachable from all branches and tags fetched by `actions/checkout` with `fetch-depth: 0`.
+A new Gitleaks workflow checks the current push/PR change range and separately scans the commit history reachable from all branches and tags fetched by `actions/checkout` with `fetch-depth: 0`.
 
-The first all-refs scan found **one historical secret-pattern candidate across 146 commits / approximately 28.4 MB**. The current-commit and PR change-range scan reported no findings, but that does not clear the older repository history. The candidate has not yet been confirmed as a real credential or a false positive.
+The first all-refs scan found **one historical `generic-api-key` candidate across 146 commits / approximately 28.4 MB**. The current-commit/change-range scan reported no findings. The all-refs result was traced to:
+- file: `frontend/remittances.module-NQRWOT73.js`;
+- commit: `b9c089177947252af5c6b65e68454911d66d3d22`;
+- line: 1, columns 1856–1908.
 
-**Required action:**
-1. Identify the file, line, commit and Gitleaks rule from the redacted workflow summary.
-2. Inspect the candidate securely without copying its value into a ticket, comment or chat.
-3. If it is a real or possibly live credential, rotate/revoke it with its owner and remove it from all reachable refs through an approved history rewrite before public release.
-4. If demonstrably synthetic or non-sensitive, record the reason and exact fingerprint in `.gitleaksignore`; do not suppress the whole rule or ignore an unreviewed hit.
-5. Re-run the all-refs scan and ensure it passes after any history cleanup.
-6. Separately perform manual checks for customer identifiers, private endpoints, sensitive architecture and personal data: secret scanners cannot detect every disclosure risk.
+Manual source correlation against the exact pinned Mifos revision established this as a **false positive, not a hard-coded API-key value**. The matched span is a property read (`Y.mifosRemittanceApiKey`) from the runtime environment object. The pinned Mifos `src/environments/environment.ts` maps this property to `window.env?.mifosRemittanceApiClientKey || ''`; the tracked runtime template exposes that browser field, and the sanitised NGINX entrypoint forces `MIFOS_REMITTANCE_API_CLIENT_KEY` to an empty string. The scan hit is the identifier/property reference, not a literal key value.
+
+A single fingerprint-specific exception has been added to the repository's `.gitleaksignore` for this exact commit/file/rule/line. No rule-wide or path-wide suppression was added. See [the source mapping in the pinned Mifos environment file](https://github.com/openMF/web-app/blob/4f5be2d5040e37ae26adef023c610028cbf34343/src/environments/environment.ts), [the sanitised frontend entrypoint](../nginx/docker-entrypoint.sh), and the [narrow ignore entry](../.gitleaksignore).
+
+**Remaining action:** the all-refs scan must pass after this narrow suppression on the final review commit. If any new or different finding appears, investigate it individually; never broaden this exception. Also perform manual checks for customer identifiers, private endpoints, sensitive architecture and personal data: secret scanners cannot detect every disclosure risk.
 
 The workflow run status and redacted metadata are available from [GitHub Actions](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions).
 
