@@ -1,0 +1,23 @@
+api:
+  replicaCount: 1
+frontend:
+  replicaCount: 1
+ingress:
+  enabled: true
+  className: nginx
+  api:
+    host: fineract-staging.example.invalid
+    tls:
+      - hosts:
+          - fineract-staging.example.invalid
+        secretName: fineract-api-staging-tls
+  frontend:
+    host: mifos-staging.example.invalid
+    tls:
+      - hosts:
+          - mifos-staging.example.invalid
+        secretName: mifos-web-staging-tls
+frontend:
+  api:
+    url: https://fineract-staging.example.invalid
+    urls: https://fineract-staging.example.invalid
