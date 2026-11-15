@@ -43,17 +43,17 @@ The diagram is intentionally logical. It does not disclose the original network 
 - NGINX Ingress and TLS
 - MariaDB
 
-## Repository status
+## Helm chart
 
-This repository is being built privately and sanitised before any public release. The current baseline documents the deployment journey and logical architecture. The original production manifests and pipeline files are **not** copied here.
+An initial reusable Helm chart is now included at [helm/fineract-mifos](helm/fineract-mifos). It templates the Fineract API and Mifos frontend deployments and services, uses an existing Kubernetes Secret for database connection settings, and supports optional Ingress resources with independent TLS configuration.
 
-**Next milestone:** create and validate a reusable Helm chart with environment-specific values, external database configuration, Kubernetes Secret references, ingress/TLS options, health probes, resource settings and documented upgrade/rollback guidance.
+The chart uses example-only image repositories, hostnames and Secret names. It is **not approved for production installation**. The GitHub Actions workflow runs Helm lint and template rendering for the default, development, staging and production-example values. A disposable-cluster installation and upgrade/rollback test is still required before considering the chart validated for a real environment.
 
 See:
 - [Deployment journey](docs/deployment-journey.md)
 - [Architecture notes](docs/architecture.md)
 - [Security and sanitisation rules](docs/security-and-disclosure.md)
-- [Helm chart plan](helm/README.md)
+- [Helm chart documentation](helm/README.md)
 
 ## Evidence and attribution
 
