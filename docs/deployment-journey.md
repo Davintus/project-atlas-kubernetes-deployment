@@ -67,6 +67,8 @@ The reviewed historical Mifos frontend distribution has now been imported under 
 
 The pinned Fineract API image has also now been rebuilt locally. The script checked out the recorded full source SHA, built with Temurin 25.0.5 and Gradle 9.7.1, produced `fineract-api:local`, and verified that MariaDB Connector/J 3.5.7 and its runtime classpath entry were present inside the image. The Gradle build completed successfully in 7 minutes 28 seconds. The image has not yet been started against a database or validated through a real API health check.
 
+Both local images were then inspected as Linux/AMD64 images. The Fineract image is approximately 299 MB and its bundled Zulu runtime reports Java 25.0.5.0.3; the Mifos image is approximately 40 MB. The Fineract check invoked the image's Java executable with `-version` only. Application startup and database connectivity remain to be tested.
+
 The remaining work is to:
 
 1. run the frontend validator and build/smoke-test the actual Mifos NGINX image;
