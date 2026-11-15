@@ -6,11 +6,21 @@ on:
       - docs/sanitised-project-baseline
     paths:
       - "helm/**"
+      - "k8s/**"
+      - "scripts/**"
+      - "nginx/**"
+      - "Dockerfile.mifos"
       - ".github/workflows/helm-validation.yml"
+      - ".github/workflows/helm-kind-smoke.yml"
   pull_request:
     paths:
       - "helm/**"
+      - "k8s/**"
+      - "scripts/**"
+      - "nginx/**"
+      - "Dockerfile.mifos"
       - ".github/workflows/helm-validation.yml"
+      - ".github/workflows/helm-kind-smoke.yml"
 
 permissions:
   contents: read
@@ -27,6 +37,24 @@ jobs:
         uses: azure/setup-helm@v5
         with:
           version: v4.3.1
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.33.0
+
+      - name: Check shell syntax
+        run: |
+          bash -n scripts/build-fineract-image.sh
+          sh -n nginx/docker-entrypoint.sh
+
+      - name: Render Kustomize overlays
+        run: |
+          for overlay in development staging production; do
+            echo "Rendering Kustomize overlay: $overlay"
+            kubectl kustomize "k8s/overlays/$overlay" > "/tmp/$overlay-rendered.yaml"
+            test -s "/tmp/$overlay-rendered.yaml"
+          done
 
       - name: Lint chart
         run: helm lint helm/fineract-mifos
