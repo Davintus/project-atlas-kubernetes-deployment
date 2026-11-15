@@ -46,6 +46,7 @@ jobs:
       - name: Check shell syntax
         run: |
           bash -n scripts/build-fineract-image.sh
+          bash -n scripts/build-mifos-image.sh
           sh -n nginx/docker-entrypoint.sh
 
       - name: Render Kustomize overlays
