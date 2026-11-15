@@ -4,3 +4,6 @@
 # sanitised NGINX entrypoint forces MIFOS_REMITTANCE_API_CLIENT_KEY to an empty string.
 # Keep this exception commit/file/rule/line-specific; do not broaden it to the whole bundle or rule.
 b9c089177947252af5c6b65e68454911d66d3d22:frontend/remittances.module-NQRWOT73.js:generic-api-key:1
+# Squash-merging the reviewed PR reintroduced the same confirmed span under the new merge commit SHA.
+# It is still the Y.mifosRemittanceApiKey property reference, not a literal credential.
+7fecb49edefbf6f44459a04f3fdc7d6a232e71ae:frontend/remittances.module-NQRWOT73.js:generic-api-key:1
