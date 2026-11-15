@@ -1,0 +1,95 @@
+{{- if .Values.api.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fineract-mifos.apiName" . }}
+  labels:
+    {{- include "fineract-mifos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "fineract-mifos.apiSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fineract-mifos.apiSelectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: fineract-api
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          ports:
+            - name: https
+              containerPort: {{ .Values.api.containerPort }}
+              protocol: TCP
+          env:
+            - name: FINERACT_SERVER_SSL_ENABLED
+              value: {{ .Values.api.env.serverSslEnabled | quote }}
+            - name: FINERACT_SERVER_PORT
+              value: {{ .Values.api.env.serverPort | quote }}
+            - name: FINERACT_DEFAULT_TENANTDB_IDENTIFIER
+              value: {{ .Values.api.env.tenantIdentifier | quote }}
+            - name: FINERACT_HIKARI_DRIVER_SOURCE_CLASS_NAME
+              value: {{ .Values.api.env.driverSourceClassName | quote }}
+            - name: FINERACT_DEFAULT_TENANTDB_HOSTNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.database.existingSecret | quote }}
+                  key: {{ .Values.api.database.keys.host | quote }}
+            - name: FINERACT_DEFAULT_TENANTDB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.database.existingSecret | quote }}
+                  key: {{ .Values.api.database.keys.port | quote }}
+            - name: FINERACT_DEFAULT_TENANTDB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.database.existingSecret | quote }}
+                  key: {{ .Values.api.database.keys.database | quote }}
+            - name: FINERACT_DEFAULT_TENANTDB_UID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.database.existingSecret | quote }}
+                  key: {{ .Values.api.database.keys.username | quote }}
+            - name: FINERACT_DEFAULT_TENANTDB_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.database.existingSecret | quote }}
+                  key: {{ .Values.api.database.keys.password | quote }}
+            - name: FINERACT_HIKARI_JDBC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.database.existingSecret | quote }}
+                  key: {{ .Values.api.database.keys.tenantsJdbcUrl | quote }}
+            - name: FINERACT_HIKARI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.database.existingSecret | quote }}
+                  key: {{ .Values.api.database.keys.username | quote }}
+            - name: FINERACT_HIKARI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.database.existingSecret | quote }}
+                  key: {{ .Values.api.database.keys.password | quote }}
+            {{- with .Values.api.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.api.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.api.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}
