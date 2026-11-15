@@ -55,6 +55,8 @@ The repository now includes the sanitised application build and deployment scaff
 
 **Frontend build status:** The reviewed Mifos static distribution is committed under `frontend/` (import commit `b9c0891`). Its validator passed, the `mifos-web:local` image built successfully, and a local container smoke test returned HTTP 200 from NGINX and generated `assets/env.js` with optional browser-side API-key fields empty. This verifies frontend static delivery and runtime configuration only; real Fineract API connectivity and full application integration remain outstanding. A complete third-party licence, permission and disclosure review is still required before any public release. This repository also does not yet include a complete executable VM Compose environment because its original environment and tenant bootstrap files have not been imported and sanitised.
 
+**Fineract API build status:** The pinned source revision `d63beed7ccfeadaffa0c7842b1011bc88451376f` was rebuilt locally with Temurin 25.0.5 and Gradle 9.7.1. Jib produced `fineract-api:local`, and the build script verified MariaDB Connector/J 3.5.7 and its runtime classpath entry inside the image. The build completed successfully in 7 minutes 28 seconds. This is an image-build result, not yet a runtime or MariaDB integration test.
+
 ## Helm chart
 
 The initial reusable Helm chart is at [helm/fineract-mifos](helm/fineract-mifos). It templates the Fineract API and Mifos frontend Deployments and Services, consumes a pre-created Kubernetes Secret for database settings, and supports optional Ingress resources with separate TLS configuration.
