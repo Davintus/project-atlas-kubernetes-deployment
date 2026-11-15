@@ -63,18 +63,18 @@ These checks validate Helm packaging and Kubernetes release lifecycle. They do *
 
 ## 7. Remaining integration milestone
 
-The historical Mifos frontend distribution (approximately 35 MB) is not yet in this repository. The current `frontend/` directory is a placeholder, so the frontend image build script cannot produce the historical application image until the reviewed distribution is imported.
+The reviewed historical Mifos frontend distribution has now been imported under `frontend/` on the private portfolio branch. Its archive fingerprint and expected paths were checked before extraction, and the generated runtime `env.js` is deliberately excluded from source control.
 
 The remaining work is to:
 
-1. verify the frontend bundle's source revision, licence notices and permission to redistribute it;
-2. import the static bundle after removing generated environment-specific files;
-3. prepare an isolated MariaDB instance with synthetic tenant data and the required Fineract bootstrap configuration;
-4. build both real application images from pinned source/assets;
-5. install them with the Helm chart into a disposable Kubernetes cluster; and
-6. verify Fineract startup, tenant upgrade, API health, Mifos-to-API connectivity, and Helm upgrade/rollback behaviour.
+1. run the frontend validator and build/smoke-test the actual Mifos NGINX image;
+2. prepare an isolated MariaDB instance with synthetic tenant data and the required Fineract bootstrap configuration;
+3. build the pinned Fineract API image and the imported Mifos frontend image;
+4. install both real application images with the Helm chart into a disposable Kubernetes cluster;
+5. verify Fineract startup, tenant upgrade, API health and Mifos-to-API connectivity; and
+6. test Helm upgrade and rollback with the real application workloads.
 
-Only after those checks should the repository describe the complete application deployment as reproducible.
+The Mifos frontend source line is tagged for Fineract 1.14, whereas the Kubernetes API image is based on a Fineract 1.16.1-derived revision. Their compatibility must be demonstrated by the real-app integration test. The private portfolio branch is not ready for public release until the third-party licence, permission and disclosure reviews are complete.
 
 ## Lessons
 
