@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mifos-web
+spec:
+  template:
+    spec:
+      containers:
+        - name: mifos-web
+          env:
+            - name: FINERACT_API_URL
+              value: "https://fineract.example.invalid"
+            - name: FINERACT_API_URLS
+              value: "https://fineract.example.invalid"
