@@ -1,65 +1,98 @@
-# Helm chart — planned implementation
+# Fineract and Mifos Helm chart
 
-**Status: not yet implemented or validated.** This document defines the next engineering milestone; it is not a claim that a working chart is already available.
+This chart deploys the Apache Fineract API and Mifos web frontend. MariaDB is intentionally external to the chart: the chart creates application Deployments, ClusterIP Services and optional Ingress resources, but does not create, migrate, back up or manage a database.
 
-## Intended chart scope
+## Status and safety
 
-A reusable chart for deploying:
+This is an initial portfolio chart prepared from a sanitised deployment model. It has not been installed into the original cluster and must not be used against production as-is. All image references and hostnames in the defaults are example-only placeholders.
 
-- Apache Fineract API;
-- Mifos web frontend;
-- Kubernetes Services for both workloads;
-- optional Ingress resources for both application routes.
+The GitHub Actions workflow runs:
 
-The database remains external to the chart by default. This avoids silently coupling application release lifecycle to persistent database lifecycle.
+- helm lint;
+- helm template using default values;
+- helm template using the development, staging and production-example values.
 
-## Configuration design
+A disposable Kubernetes installation, API/frontend connectivity check and Helm upgrade/rollback test are still required before the chart can be considered operationally validated.
 
-Values should be separated by concern and environment:
+## Prerequisites
 
-- image repository, tag and pull policy for API and frontend;
-- replica counts and resource requests/limits;
-- application environment variables;
-- references to pre-created Kubernetes Secrets for database credentials and master-password material;
-- API and frontend Service ports;
-- ingress enablement, class, hostnames, TLS secret references and annotations;
-- readiness and liveness probes;
-- optional pod scheduling, security context and image pull secrets.
+- A Kubernetes cluster with a compatible ingress controller if Ingress is enabled.
+- Deployable Fineract API and Mifos frontend container images.
+- An externally managed MariaDB instance and databases provisioned for Fineract.
+- A Kubernetes Secret in the target namespace containing the database connection values required by the API.
+- TLS Secret resources in the target namespace when TLS is enabled.
 
-No real production values, hostnames, credentials, registry paths or cluster-specific ingress class names belong in the chart defaults.
+## Database Secret contract
 
-## Validation plan
+By default, the API Deployment reads these keys from the existing Secret named fineract-db-credentials:
 
-1. Run helm lint on the chart.
-2. Render default and environment-specific configurations with helm template.
-3. Inspect rendered output for hard-coded domains, IPs, credentials and cloud identifiers.
-4. Validate rendered Kubernetes objects against the target Kubernetes API version.
-5. Perform a dry-run installation in a disposable test namespace.
-6. Verify API and frontend rollout behaviour, service routing, TLS configuration and health probes.
-7. Test an upgrade and rollback using synthetic configuration and a disposable database.
-8. Document external database preparation, Secret creation, install, upgrade and rollback commands.
+| Secret key | Used for |
+|---|---|
+| DB_HOST | Default tenant database host |
+| DB_PORT | Default tenant database port |
+| DEFAULT_DB | Default tenant database name |
+| DB_USER | Database username |
+| DB_PASSWORD | Database password |
+| TENANTS_JDBC_URL | JDBC URL for the tenant store |
 
-## Proposed chart layout
+Override the Secret name and key names under api.database in a values file when necessary. The chart does not create a Secret and never places credential values in chart defaults.
 
-~~~text
-helm/
-  fineract-mifos/
-    Chart.yaml
-    values.yaml
-    values.schema.json
-    templates/
-      _helpers.tpl
-      api-deployment.yaml
-      api-service.yaml
-      frontend-deployment.yaml
-      frontend-service.yaml
-      ingress-api.yaml
-      ingress-frontend.yaml
-      NOTES.txt
-    values/
-      development.yaml
-      staging.yaml
-      production.example.yaml
+Fineract tenant master-password/encryption configuration is version-sensitive. Use api.extraEnv to add the exact environment variable(s) supported by the Fineract version being deployed, with valueFrom.secretKeyRef pointing to a Secret. Do not guess the variable name or commit its value; verify the setting against the selected Fineract version and the deployment's approved configuration.
+
+## Configure before installation
+
+1. Replace both example image repositories and tags with the images built for your own environment.
+2. Change the frontend API URL to the approved URL reachable by browsers using the Mifos interface.
+3. Change the Ingress class, hostnames, TLS Secret names and annotations to values appropriate for the target cluster.
+4. Create the database Secret and TLS Secrets out-of-band in the destination namespace.
+5. Review the rendered Kubernetes resources and confirm no real credentials or customer identifiers appear in values or manifests.
+
+## Render and lint
+
+From the repository root:
+
+~~~bash
+helm lint helm/fineract-mifos
+
+helm template project-atlas helm/fineract-mifos \
+  --namespace project-atlas
+
+helm template project-atlas helm/fineract-mifos \
+  --namespace project-atlas \
+  -f helm/fineract-mifos/values/development.yaml
 ~~~
 
-The chart will be added only after its templates have been built from a reviewed, sanitised resource model. The values files shown above are a proposed layout, not existing validated files.
+Render the staging and production-example values in the same way. Inspect the output before applying it.
+
+## Install into a disposable test namespace
+
+After replacing the example values and creating the required external Secrets:
+
+~~~bash
+helm upgrade --install project-atlas helm/fineract-mifos \
+  --namespace project-atlas-test \
+  --create-namespace \
+  -f helm/fineract-mifos/values/development.yaml \
+  --dry-run
+~~~
+
+A dry-run validates Helm rendering and release processing; it does not prove that the application can connect to MariaDB or that ingress and TLS work end to end. Follow with a real installation only in a disposable test cluster/namespace with synthetic data.
+
+## Upgrade and rollback testing
+
+Test the following with a disposable database and synthetic tenant data:
+
+- application image upgrade;
+- configuration change and rollout;
+- failed rollout recovery;
+- Helm rollback;
+- API health and frontend/API connectivity after each operation.
+
+Back up the database before running application versions that may apply schema or tenant migrations. Do not assume application rollback reverses database migrations.
+
+## Current values
+
+- values.yaml: safe general defaults.
+- values/development.yaml: one replica per workload and example development hosts.
+- values/staging.yaml: one replica per workload and example staging hosts.
+- values/production.example.yaml: two replicas per workload and placeholder production hosts. It is an illustration only, not an endorsed production configuration.
