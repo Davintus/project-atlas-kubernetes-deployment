@@ -28,6 +28,8 @@ No live credential, encrypted value, tenant identifier, schema name or database 
 
 ## 4. Refine the delivery workflow
 
+The successful API image build used Temurin JDK 25.0.5 and Gradle 9.7.1. The pipeline downloaded MariaDB Connector/J 3.5.7, added it to the Jib image runtime classpath, then checked that the driver JAR and classpath entry were present in the resulting image. The frontend image used NGINX with gettext/envsubst to generate its API environment file at container startup, keeping environment-specific values out of the static image.
+
 The resulting CI/CD process separated the main stages:
 
 1. Locate and build the Fineract API using the repository's Gradle wrapper and Jib.
