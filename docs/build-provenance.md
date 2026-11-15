@@ -31,6 +31,16 @@ The Gradle build output from a later source/build investigation also reported `p
 
 The build script defaults to this full source SHA. It accepts an explicit `FINERACT_SOURCE_REF` override, but a different source ref must be validated against its own compatible Java and Gradle requirements.
 
+## Local API image build evidence
+
+On 15 November 2026, `scripts/build-fineract-image.sh` completed successfully on the project VM using Temurin 25.0.5 and Gradle 9.7.1. It checked out the full source SHA above, downloaded MariaDB Connector/J 3.5.7, ran `:fineract-provider:jibDockerBuild`, and produced `fineract-api:local`. The script then copied the driver JAR and Jib classpath file out of the image and verified both the driver class and the `/app/libs/mariadb-java-client-3.5.7.jar` classpath entry. The observed Gradle result was `BUILD SUCCESSFUL` in 7 minutes 28 seconds (99 actionable tasks).
+
+The build log reported `project version: 1.17.0-SNAPSHOT`, while the Git description for the checked-out source is `1.16.1-383-gd63beed7cc`. Retain both observations without inferring a cause. The build emitted compiler deprecation/removal warnings and a Gradle deprecation notice, but no build errors.
+
+**Image reproducibility caveat:** Jib used the base image tag `azul/zulu-openjdk-alpine:25-jre-headless` and resolved it during this build to digest `sha256:fca8cd764db38d4c2b6e99f45269a09ef2cad8bd8546c812f40f7a4591e7e820`. The build log explicitly warned that the configured base-image reference was not pinned to a digest. For stronger long-term reproducibility, pin and review the approved base-image digest in a later change.
+
+The image remains in the VM's local Docker daemon. It has not yet been pushed to a registry, started against MariaDB, or validated through a real Fineract API health check.
+
 ## Mifos web-app source checkout
 
 | Field | Value |
