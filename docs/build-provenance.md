@@ -41,7 +41,7 @@ The build script defaults to this full source SHA. It accepts an explicit `FINER
 | Package version | `1.0.0` |
 | Licence | Mozilla Public License 2.0 |
 
-The source tag identifies this web-app line as intended for Apache Fineract 1.14. The supplied static distribution contains 468 files (approximately 34.6 MB uncompressed), including `index.html`, `assets/env.template.js`, compiled application bundles and supporting assets. The generated `assets/env.js` is absent. The bundled TinyMCE licence and notice files are present.
+The source tag identifies this web-app line as intended for Apache Fineract 1.14. The supplied static distribution contains 406 regular files across 468 archive entries (approximately 34.6 MB uncompressed), including `index.html`, `assets/env.template.js`, compiled application bundles and supporting assets. The generated `assets/env.js` is absent. The bundled TinyMCE licence and notice files are present.
 
 The Mifos 1.14-line frontend and the Kubernetes Fineract 1.16.1-derived API source are not identical version lines. The real-application integration test must therefore verify their actual API compatibility rather than assuming version alignment.
 
