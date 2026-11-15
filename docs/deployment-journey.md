@@ -8,15 +8,13 @@ The important distinction is that this was not just a YAML or pipeline syntax pr
 
 ## 2. Establish a working VM baseline
 
-I stepped back and deployed Apache Fineract and its Mifos web interface on a standalone cloud VM using Docker Compose. This was a deliberate troubleshooting step, not a retreat from automation.
+I stepped back and deployed Apache Fineract and its MariaDB database on a standalone cloud VM using Docker Compose. The Compose definition also included observability services for logs, metrics and traces.
 
-The VM deployment provided a controlled baseline to understand:
+The Mifos web interface was served separately by NGINX installed on the VM. One NGINX virtual host served the static Mifos single-page application, while another reverse-proxied requests to Fineract's local HTTPS listener. TLS certificates and HTTP-to-HTTPS redirects were configured at the VM's NGINX layer.
 
-- how the API starts and becomes healthy;
-- how MariaDB readiness relates to application startup;
-- which application configuration is required;
-- how the web interface connects to the API; and
-- which dependencies should be made explicit in a later Kubernetes deployment.
+This distinction matters: the original VM deployment did not run Mifos as a service in the same Compose stack. The later Kubernetes delivery containerised the Mifos static distribution behind its own NGINX image.
+
+The VM deployment provided a controlled baseline to understand application health, MariaDB readiness, runtime configuration and the boundary between the frontend and API.
 
 ## 3. Diagnose the Kubernetes tenant-upgrade failure
 
@@ -26,14 +24,14 @@ I traced this to the tenant credential/encryption configuration, corrected the i
 
 No live credential, encrypted value, tenant identifier, schema name or database connection string is included in this repository.
 
-## 4. Refine the delivery workflow
+## 4. Reconstruct and refine the delivery workflow
 
 The successful API image build used Temurin JDK 25.0.5 and Gradle 9.7.1. The pipeline downloaded MariaDB Connector/J 3.5.7, added it to the Jib image runtime classpath, then checked that the driver JAR and classpath entry were present in the resulting image. The frontend image used NGINX with gettext/envsubst to generate its API environment file at container startup, keeping environment-specific values out of the static image.
 
 The resulting CI/CD process separated the main stages:
 
 1. Locate and build the Fineract API using the repository's Gradle wrapper and Jib.
-2. Build the Mifos web image.
+2. Build the Mifos web image from the reviewed static frontend distribution.
 3. Tag and publish both images to a container registry.
 4. Select an environment-specific Kubernetes overlay.
 5. Render/validate the Kustomize output.
@@ -55,6 +53,29 @@ Validation was performed in layers:
 
 These checks establish application and ingress reachability at the time of testing; they are not a claim of a formal load, penetration, disaster-recovery or long-duration resilience test.
 
+## 6. Package the deployment with Helm
+
+An initial reusable Helm chart is now present in `helm/fineract-mifos`. It templates the API and frontend Deployments and Services, consumes an externally created Kubernetes Secret for database configuration, and supports optional Ingress resources with separate TLS settings.
+
+GitHub Actions has passed chart linting and template rendering for the default, development, staging and production-example values. A separate Kind smoke test installed the chart with disposable BusyBox and NGINX fixtures, verified in-cluster Service connectivity, upgraded the API replica count and rolled the release back.
+
+These checks validate Helm packaging and Kubernetes release lifecycle. They do **not** yet prove that the actual Fineract and Mifos images can run together against MariaDB.
+
+## 7. Remaining integration milestone
+
+The historical Mifos frontend distribution (approximately 35 MB) is not yet in this repository. The current `frontend/` directory is a placeholder, so the frontend image build script cannot produce the historical application image until the reviewed distribution is imported.
+
+The remaining work is to:
+
+1. verify the frontend bundle's source revision, licence notices and permission to redistribute it;
+2. import the static bundle after removing generated environment-specific files;
+3. prepare an isolated MariaDB instance with synthetic tenant data and the required Fineract bootstrap configuration;
+4. build both real application images from pinned source/assets;
+5. install them with the Helm chart into a disposable Kubernetes cluster; and
+6. verify Fineract startup, tenant upgrade, API health, Mifos-to-API connectivity, and Helm upgrade/rollback behaviour.
+
+Only after those checks should the repository describe the complete application deployment as reproducible.
+
 ## Lessons
 
 - A pipeline can deploy an unhealthy application consistently; application readiness and dependency checks matter.
@@ -62,7 +83,3 @@ These checks establish application and ingress reachability at the time of testi
 - Tenant database credentials can involve encryption and master-password configuration, not only ordinary database username/password connectivity.
 - Build, publish, deploy and post-deploy verification should be explicit pipeline stages.
 - Public technical evidence should show the engineering approach without revealing private infrastructure.
-
-## Next step
-
-Package the API and frontend deployment into a reusable Helm chart. The chart should support environment-specific values, externally managed MariaDB, Kubernetes Secret references, ingress/TLS configuration, probes, resource requests/limits and clear upgrade/rollback instructions. The chart will be tested with rendering, linting and dry-run installation before it is considered publishable.
