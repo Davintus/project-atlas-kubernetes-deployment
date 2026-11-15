@@ -94,7 +94,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:18080/ >/dev/null
           docker exec project-atlas-mifos-ci test -s /usr/share/nginx/html/assets/env.js
           docker cp project-atlas-mifos-ci:/usr/share/nginx/html/assets/env.js "$RUNNER_TEMP/env.js"
-          if grep -Eq '\\$[A-Z][A-Z0-9_]*' "$RUNNER_TEMP/env.js"; then
+          if grep -Eq '\$[A-Z][A-Z0-9_]*' "$RUNNER_TEMP/env.js"; then
             echo "Unresolved placeholders found in generated env.js." >&2
             exit 1
           fi
