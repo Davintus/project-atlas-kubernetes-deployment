@@ -31,8 +31,8 @@ while IFS= read -r member; do
       ;;
   esac
 
-  case "/$member/" in
-    *"/../"*|*"//"*)
+  case "$member" in
+    /*|../*|*/../*|*/..|*//*|*/./*|*/.)
       echo "ERROR: unsafe archive path: $member" >&2
       exit 1
       ;;
@@ -48,7 +48,8 @@ echo
 echo "Frontend files extracted. Review the complete staged/untracked file list before committing:"
 git -C "$ROOT_DIR" status --short -- frontend/
 echo
-echo "Next steps:"
+echo "The import script does not commit or push automatically."
+echo "Review, then run:"
 echo "  git add frontend/"
 echo "  git diff --cached --stat"
 echo "  git diff --cached --check"
