@@ -2,6 +2,9 @@ api:
   replicaCount: 1
 frontend:
   replicaCount: 1
+  api:
+    url: https://fineract-staging.example.invalid
+    urls: https://fineract-staging.example.invalid
 ingress:
   enabled: true
   className: nginx
@@ -17,7 +20,3 @@ ingress:
       - hosts:
           - mifos-staging.example.invalid
         secretName: mifos-web-staging-tls
-frontend:
-  api:
-    url: https://fineract-staging.example.invalid
-    urls: https://fineract-staging.example.invalid
