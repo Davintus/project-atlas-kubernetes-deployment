@@ -1,6 +1,6 @@
 # Security and sanitisation rules
 
-This repository is a public-facing portfolio project prepared from work performed in a separate customer/organisation environment. Keep it anonymised and reproducible; do not copy private production configuration.
+This repository is a private portfolio project under release review, prepared from work performed in a separate customer/organisation environment. Keep it anonymised and reproducible; do not copy private production configuration.
 
 ## Never commit
 
@@ -37,3 +37,8 @@ The .gitignore file excludes common environment, credential, kubeconfig, Terrafo
 ## Public-release gate
 
 The repository must remain private until code, manifests, docs, screenshots and commit history have been reviewed. No production deployment instructions should contain real endpoints or identity details. Do not use this repository to connect to or modify the original production environment.
+
+
+## Release-readiness record
+
+The repository must remain private until the checks in [release readiness](release-readiness.md) have been completed and approved by the relevant rights-holders. In particular, the TinyMCE notice presents GPL v2-or-later terms or Tiny's self-hosted/commercial terms; its applicable redistribution basis must be confirmed. The current source and notices are retained for review, but their presence is not legal approval.
