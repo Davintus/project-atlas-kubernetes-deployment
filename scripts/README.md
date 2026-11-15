@@ -23,7 +23,7 @@ The script prints the resolved source SHA. Override `FINERACT_SOURCE_REF` only w
 
 ## Mifos frontend
 
-The reviewed historical Mifos frontend archive can be imported with its checksum-verified script:
+Import the reviewed static Mifos distribution with the checksum-verified script:
 
 ~~~bash
 bash scripts/import-mifos-frontend.sh /path/to/mifos-frontend-review.tar.gz
@@ -38,6 +38,6 @@ export MIFOS_IMAGE_TAG=local
 bash scripts/build-mifos-image.sh
 ~~~
 
-The build first validates `index.html`, `assets/env.template.js`, the Mifos MPL header and bundled TinyMCE licence/notice files. It refuses to package a generated `assets/env.js` or common credential/database files.
+The build validates `index.html`, `assets/env.template.js`, the Mifos MPL header and bundled TinyMCE licence/notice files. It refuses to package a generated `assets/env.js` or common credential/database files.
 
-The container entrypoint renders `assets/env.js` at startup. Values placed in that file are visible in the browser. The two optional integration API-key fields are deliberately blank and their integrations disabled by default. Do not provide confidential credentials through frontend environment variables; use a trusted backend proxy when required.
+The container entrypoint generates `assets/env.js` at startup. Values written to that file are visible in the browser. The two optional integration API-key fields are deliberately blank and their integrations disabled by default. Do not provide confidential credentials through frontend environment variables; use a trusted backend proxy where required.
