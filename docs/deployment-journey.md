@@ -91,7 +91,7 @@ The test claims remain deliberately distinct:
 - The Helm validation workflow renders Kustomize and Helm manifests; it does not deploy an application.
 - The frontend CI workflow builds and smoke-tests the Mifos frontend image; it does not establish full interactive browser login or comprehensive Fineract/Mifos version compatibility.
 
-Project Atlas is intended to be refined collaboratively. Contributors with access to the currently private repository are welcome to improve the example Helm chart, Kubernetes overlays, CI validation, security controls, documentation and synthetic test fixtures. Broader community contributions can be invited once the sanitisation, licensing, permission and disclosure reviews permit public release. Never contribute customer details, live credentials, private network information or production configuration.
+Project Atlas is intended to be refined collaboratively. Contributors with access to the currently private repository are welcome to improve the example Helm chart, Kubernetes overlays, CI validation, security controls, documentation and synthetic test fixtures. Broader community contributions can be invited once the sanitisation, licensing, permission and disclosure reviews in [release readiness](release-readiness.md) permit public release. Never contribute customer details, live credentials, private network information or production configuration.
 
 ## Lessons
 
