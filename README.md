@@ -53,7 +53,7 @@ The repository now includes the sanitised application build and deployment scaff
 - [Kubernetes base manifests](k8s/base/) and [environment overlays](k8s/overlays/) — retain the two Deployments, two Services, MariaDB Secret contract, ingress and namespace layout.
 - [VM baseline notes](vm-baseline/README.md) — explain the earlier Docker Compose troubleshooting stage.
 
-**Frontend build and runtime status:** The reviewed Mifos static distribution is committed under `frontend/` (import commit `b9c0891`). Its validator passed and the `mifos-web:local` image built successfully. On 15 November 2026, the VM-hosted container served the frontend and generated `assets/env.js`; both `/` and `/assets/env.js` returned HTTP 200. The runtime file contained the expected Fineract API base URL, API provider path and `default` tenant identifier, while optional browser-side API-key fields remained empty. The same test environment successfully sent an authenticated offices API request through the Mifos NGINX reverse proxy to Fineract and received HTTP 200. Interactive browser login was not completed because workstation-to-VM port forwarding could not be established, so no claim is made that the Mifos dashboard or full user workflow was browser-validated. A complete third-party licence, permission and disclosure review is still required before any public release. A complete executable VM Compose environment has not been imported because its original environment and tenant bootstrap files have not been sanitised.
+**Frontend build and runtime status:** The reviewed Mifos frontend distribution was imported into the VM checkout and the `mifos-web:local` image built successfully. On 15 November 2026, the VM-hosted container served the frontend and generated `assets/env.js`; both `/` and `/assets/env.js` returned HTTP 200. The runtime file contained the expected Fineract API base URL, API provider path and `default` tenant identifier, while optional browser-side API-key fields remained empty. An authenticated offices API request through the Mifos NGINX reverse proxy returned HTTP 200. However, GitHub Actions exposed a source-control issue: `frontend/assets/env.template.js` is absent from the GitHub branch because the ignore pattern `frontend/assets/env.*.js` also matches that required template. The local VM build passed because the file existed in that checkout; the GitHub Actions frontend validation cannot pass until the template is explicitly tracked. The generated `env.js` remains ignored. Interactive browser login was not completed because workstation-to-VM port forwarding could not be established. A complete third-party licence, permission and disclosure review is still required before any public release. A complete executable VM Compose environment has not been imported because its original environment and tenant bootstrap files have not been sanitised.
 
 **Fineract API build and runtime status:** The pinned source revision `d63beed7ccfeadaffa0c7842b1011bc88451376f` was rebuilt locally with Temurin 25.0.5 and Gradle 9.7.1. Jib produced `fineract-api:local`, and the build script verified MariaDB Connector/J 3.5.7 and its runtime classpath entry inside the image. The build completed successfully in 7 minutes 28 seconds. On 15 November 2026, that image was started against a disposable MariaDB 12.2.2 instance with isolated tenant and default databases. Fineract's HTTP health endpoint returned 200 with status `UP`; the authenticated offices endpoint returned HTTP 200 and the default Head Office record, both directly and through the Mifos NGINX proxy.
 
@@ -71,11 +71,13 @@ This is evidence of real-image startup, MariaDB connectivity, frontend static de
 
 The local POC used HTTP between containers on a private Docker network, with host access bound to VM loopback. This is a test arrangement, not a production TLS recommendation. The existing Kubernetes/Ingress reference and the local Docker POC are distinct validation environments.
 
-## Helm chart
+## Helm chart as an optional deployment path
 
 The initial reusable Helm chart is at [helm/fineract-mifos](helm/fineract-mifos). It templates the Fineract API and Mifos frontend Deployments and Services, consumes a pre-created Kubernetes Secret for database settings, and supports optional Ingress resources with separate TLS configuration.
 
-The chart uses example-only images, hostnames and Secret names. It is **not approved for production installation**. GitHub Actions validates chart lint/rendering and runs an isolated kind-based smoke test using disposable BusyBox/NGINX test containers. That smoke test validates Helm installation, in-cluster Service connectivity, upgrade and rollback; it does not run the real Fineract application or prove MariaDB integration.
+Helm is included as a possible way to package and deploy these workloads if the project is extended in that direction. **Installing the real Fineract and Mifos images through Helm is not part of the current scope and is not currently planned.** The chart is a reusable starting point and a demonstration of how the VM-validated workloads could be expressed as a Helm release. It uses example-only images, hostnames and Secret names and is not approved for production installation.
+
+The separate Kind lifecycle workflow installed the chart with disposable BusyBox/NGINX fixtures and tested service connectivity, upgrade and rollback. It did not install or run the real application images. CI history and the outstanding frontend validation issue are documented below.
 
 See:
 - [Deployment journey](docs/deployment-journey.md)
@@ -86,6 +88,23 @@ See:
 - [Kustomize deployment](k8s/README.md)
 - [Security and sanitisation rules](docs/security-and-disclosure.md)
 - [Helm chart documentation](helm/README.md)
+
+## CI validation status (15 November 2026)
+
+The GitHub Actions history was reviewed rather than treating the workflow as uniformly green:
+
+- The combined workflow run **#32** completed successfully. At that commit the Mifos frontend bundle had not yet been imported, so the frontend validation and image-build steps were deliberately skipped; Helm lint and the four values render checks did run successfully.
+- The separate Kind smoke-test runs **#1 and #2** completed successfully using disposable BusyBox and NGINX fixtures. These validate chart lifecycle mechanics, not real Fineract/Mifos runtime behaviour.
+- Combined workflow runs **#33 through #42** all failed in the step `Validate Mifos frontend distribution when present`. The error was `frontend/assets/env.template.js` missing or empty. The subsequent Mifos image build and Helm lint/render steps were skipped.
+- The root cause is the broad `.gitignore` rule `frontend/assets/env.*.js`, which unintentionally ignores `env.template.js` as well as the generated `env.js`. A negated exception has been added for the template. The template itself still needs to be added to Git from the VM checkout; until that is committed, the combined GitHub Actions workflow should be considered **failing**, not green.
+
+See the [latest failed run #42](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43725300686), the [earlier successful chart validation run #32](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43702483631), and the [Kind fixture smoke test run #2](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43677074327).
+
+## Contributions
+
+Project Atlas is intended to be improved collaboratively. Contributions are welcome to refine the Helm chart, Kubernetes manifests, CI checks, security defaults, documentation and reproducible test fixtures. Please keep examples generic, use synthetic data, add validation for behaviour changes and never submit customer configuration, credentials, private endpoints or production artefacts.
+
+The repository is currently private while sanitisation, licensing, permission and disclosure reviews are completed. Collaborators who have repository access can contribute now; broader community pull requests can be welcomed after the repository is approved for public release. See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.
 
 ## Evidence and attribution
 
