@@ -61,4 +61,4 @@ Any value substituted into `env.js` is delivered to the browser and is therefore
 
 ## Import status
 
-The archive has been reviewed but its 468 static files have not yet been committed to this GitHub branch. Use [the checksum-verified import script](../scripts/import-mifos-frontend.sh) from a Git-enabled clone to extract it into `frontend/`. The script checks the archive SHA-256 and expected top-level paths before extraction.
+The reviewed static distribution is committed under `frontend/` on the private `docs/sanitised-project-baseline` branch (import commit `b9c0891`). The checksum-verified import script validated the archive SHA-256 and expected top-level paths before extraction. The generated `assets/env.js` is not part of the committed distribution; it is created at container startup. The actual container build and real Fineract/Mifos integration test remain outstanding. The targeted archive review is not a complete security audit or legal approval for public redistribution.
