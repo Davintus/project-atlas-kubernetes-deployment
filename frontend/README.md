@@ -8,7 +8,7 @@ The historical Mifos static frontend distribution has been supplied and reviewed
 - Package version: `1.0.0`
 - Licence: MPL-2.0
 
-The archive contains 468 files (approximately 34.6 MB uncompressed), including `index.html` and `assets/env.template.js`. It does not contain the generated `assets/env.js`. Its SHA-256 is recorded in [build provenance](../docs/build-provenance.md).
+The archive contains 406 regular files across 468 archive entries (approximately 34.6 MB uncompressed), including `index.html` and `assets/env.template.js`. It does not contain the generated `assets/env.js`. Its SHA-256 is recorded in [build provenance](../docs/build-provenance.md).
 
 **Import status:** the static files have not yet been committed to this GitHub branch. The checksum-verified import script checks the exact reviewed archive before extraction.
 
