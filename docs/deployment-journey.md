@@ -65,6 +65,8 @@ These checks validate Helm packaging and Kubernetes release lifecycle. They do *
 
 The reviewed historical Mifos frontend distribution has now been imported under `frontend/` on the private portfolio branch. Its archive fingerprint and expected paths were checked before extraction, and the generated runtime `env.js` is deliberately excluded from source control. The frontend validator passed (409 files, 34,643,965 bytes), the `mifos-web:local` image built successfully, and a disposable container returned HTTP 200 from NGINX while generating the runtime configuration. The optional browser-side API-key fields were confirmed empty. This is a static frontend/container smoke test only; it does not verify Fineract API communication.
 
+The pinned Fineract API image has also now been rebuilt locally. The script checked out the recorded full source SHA, built with Temurin 25.0.5 and Gradle 9.7.1, produced `fineract-api:local`, and verified that MariaDB Connector/J 3.5.7 and its runtime classpath entry were present inside the image. The Gradle build completed successfully in 7 minutes 28 seconds. The image has not yet been started against a database or validated through a real API health check.
+
 The remaining work is to:
 
 1. run the frontend validator and build/smoke-test the actual Mifos NGINX image;
