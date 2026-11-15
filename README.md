@@ -57,6 +57,8 @@ The repository now includes the sanitised application build and deployment scaff
 
 **Fineract API build status:** The pinned source revision `d63beed7ccfeadaffa0c7842b1011bc88451376f` was rebuilt locally with Temurin 25.0.5 and Gradle 9.7.1. Jib produced `fineract-api:local`, and the build script verified MariaDB Connector/J 3.5.7 and its runtime classpath entry inside the image. The build completed successfully in 7 minutes 28 seconds. This is an image-build result, not yet a runtime or MariaDB integration test.
 
+**Local image inspection:** Both local images were inspected as `linux/amd64`. `fineract-api:local` is approximately 299 MB and its bundled Zulu Java runtime reports 25.0.5; `mifos-web:local` is approximately 40 MB. The Fineract check invoked only `java -version` inside the image. The API server has not yet been started against MariaDB.
+
 ## Helm chart
 
 The initial reusable Helm chart is at [helm/fineract-mifos](helm/fineract-mifos). It templates the Fineract API and Mifos frontend Deployments and Services, consumes a pre-created Kubernetes Secret for database settings, and supports optional Ingress resources with separate TLS configuration.
