@@ -64,7 +64,7 @@ The image remains in the VM's local Docker daemon. It has not yet been pushed to
 
 The source tag identifies this web-app line as intended for Apache Fineract 1.14. The supplied static distribution contains 406 regular files across 468 archive entries (approximately 34.6 MB uncompressed), including `index.html`, `assets/env.template.js`, compiled application bundles and supporting assets. The generated `assets/env.js` is absent. The bundled TinyMCE licence and notice files are present.
 
-The Mifos 1.14-line frontend and the Kubernetes Fineract 1.16.1-derived API source are not identical version lines. The real-application integration test must therefore verify their actual API compatibility rather than assuming version alignment.
+The Mifos 1.14-line frontend and the Kubernetes Fineract 1.16.1-derived API source are not identical version lines. The VM-side integration test below verified one authenticated offices API request through the frontend proxy. This is evidence of basic request-path compatibility, not proof of comprehensive API or UI compatibility.
 
 The reviewed archive SHA-256 is:
 
