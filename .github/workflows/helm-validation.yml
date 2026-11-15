@@ -1,4 +1,4 @@
-name: Validate Helm chart
+name: Validate Helm chart and Mifos image
 
 on:
   push:
@@ -10,10 +10,8 @@ on:
       - "scripts/**"
       - "nginx/**"
       - "frontend/**"
-      - "scripts/validate-mifos-frontend.sh"
-      - "frontend/**"
-      - "scripts/validate-mifos-frontend.sh"
       - "Dockerfile.mifos"
+      - "docs/build-provenance.md"
       - ".github/workflows/helm-validation.yml"
       - ".github/workflows/helm-kind-smoke.yml"
   pull_request:
@@ -22,7 +20,9 @@ on:
       - "k8s/**"
       - "scripts/**"
       - "nginx/**"
+      - "frontend/**"
       - "Dockerfile.mifos"
+      - "docs/build-provenance.md"
       - ".github/workflows/helm-validation.yml"
       - ".github/workflows/helm-kind-smoke.yml"
 
@@ -31,7 +31,7 @@ permissions:
 
 jobs:
   helm:
-    name: Lint and render chart
+    name: Lint, render and smoke-test
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -51,6 +51,8 @@ jobs:
         run: |
           bash -n scripts/build-fineract-image.sh
           bash -n scripts/build-mifos-image.sh
+          bash -n scripts/validate-mifos-frontend.sh
+          bash -n scripts/import-mifos-frontend.sh
           sh -n nginx/docker-entrypoint.sh
 
       - name: Render Kustomize overlays
@@ -61,14 +63,21 @@ jobs:
             test -s "/tmp/$overlay-rendered.yaml"
           done
 
-      - name: Build and smoke-test Mifos frontend when distribution is present
+      - name: Validate Mifos frontend distribution when present
+        run: |
+          if [ ! -s frontend/index.html ]; then
+            echo "Historical Mifos frontend is not yet imported; image build will be skipped."
+            exit 0
+          fi
+          bash scripts/validate-mifos-frontend.sh frontend
+
+      - name: Build and smoke-test Mifos frontend when present
         run: |
           if [ ! -s frontend/index.html ]; then
             echo "Historical Mifos distribution is not yet imported; skipping image build."
             exit 0
           fi
 
-          bash scripts/validate-mifos-frontend.sh frontend
           docker build --pull -f Dockerfile.mifos -t project-atlas/mifos-web:ci .
           docker run -d --name project-atlas-mifos-ci -p 127.0.0.1:18080:8080 project-atlas/mifos-web:ci
 
