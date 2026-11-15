@@ -20,7 +20,7 @@ The supplied static frontend archive contains the expected Mifos distribution, i
 
 This preserves the identified project and bundled TinyMCE notices; it is not a complete third-party licensing review or legal approval for public release.
 
-The static files have not yet been committed to this GitHub branch. The `frontend/` directory remains a placeholder until the archive is imported using [the checksum-verified import script](../scripts/import-mifos-frontend.sh).
+The reviewed static distribution is committed under `frontend/` in the sanitised portfolio branch. The runtime template `frontend/assets/env.template.js` was absent from the initial Git checkout even though it was present in the reviewed upstream archive and in the VM build context. It has now been restored in the release-review branch from the pinned Mifos web-app source revision, retaining its MPL-2.0 notice and adapting only the template content needed to keep optional browser-visible API-key values empty. The generated `frontend/assets/env.js` remains excluded from Git. The archive import and its fingerprint are documented in [build provenance](build-provenance.md).
 
 ## Security note on frontend environment variables
 
