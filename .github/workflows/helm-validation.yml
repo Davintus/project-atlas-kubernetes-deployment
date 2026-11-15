@@ -8,15 +8,22 @@ on:
     paths:
       - "helm/**"
       - "k8s/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
       - ".github/workflows/helm-validation.yml"
       - ".github/workflows/mifos-frontend-validation.yml"
+      - ".github/workflows/helm-kind-smoke.yml"
   pull_request:
     paths:
       - "helm/**"
       - "k8s/**"
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "docs/**"
       - ".github/workflows/helm-validation.yml"
-  workflow_dispatch:
-
+      - ".github/workflows/mifos-frontend-validation.yml"
+      - ".github/workflows/helm-kind-smoke.yml"
   workflow_dispatch:
 
 permissions:
