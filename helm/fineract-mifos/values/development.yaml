@@ -1,0 +1,22 @@
+api:
+  replicaCount: 1
+frontend:
+  replicaCount: 1
+  api:
+    url: https://fineract-dev.example.invalid
+    urls: https://fineract-dev.example.invalid
+ingress:
+  enabled: true
+  className: nginx
+  api:
+    host: fineract-dev.example.invalid
+    tls:
+      - hosts:
+          - fineract-dev.example.invalid
+        secretName: fineract-api-dev-tls
+  frontend:
+    host: mifos-dev.example.invalid
+    tls:
+      - hosts:
+          - mifos-dev.example.invalid
+        secretName: mifos-web-dev-tls

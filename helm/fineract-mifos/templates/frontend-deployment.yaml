@@ -1,0 +1,59 @@
+{{- if .Values.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fineract-mifos.frontendName" . }}
+  labels:
+    {{- include "fineract-mifos.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "fineract-mifos.frontendSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "fineract-mifos.frontendSelectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: mifos-web
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.frontend.containerPort }}
+              protocol: TCP
+          env:
+            - name: FINERACT_API_URL
+              value: {{ .Values.frontend.api.url | quote }}
+            - name: FINERACT_API_URLS
+              value: {{ .Values.frontend.api.urls | quote }}
+            - name: FINERACT_API_PROVIDER
+              value: {{ .Values.frontend.api.provider | quote }}
+            - name: FINERACT_API_VERSION
+              value: {{ .Values.frontend.api.version | quote }}
+            - name: FINERACT_API_ACTUATOR
+              value: {{ .Values.frontend.api.actuator | quote }}
+            - name: FINERACT_DEFAULT_TENANT
+              value: {{ .Values.frontend.api.defaultTenant | quote }}
+            {{- with .Values.frontend.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.frontend.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.frontend.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.frontend.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}

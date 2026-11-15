@@ -1,0 +1,43 @@
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.kubeconfig
+kubeconfig
+kubeconfig.*
+credentials
+credentials.*
+secrets/
+private/
+
+# Cloud and infrastructure state
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Local build outputs and logs
+build/
+dist/
+coverage/
+*.log
+*.dump
+*.sql
+*.sql.gz
+*.bak
+*.backup
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

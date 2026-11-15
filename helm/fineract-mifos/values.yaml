@@ -1,0 +1,119 @@
+nameOverride: ""
+fullnameOverride: ""
+
+imagePullSecrets: []
+
+api:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: example.invalid/portfolio/fineract-api
+    tag: "0.0.0-example"
+    pullPolicy: IfNotPresent
+  containerPort: 8443
+  service:
+    type: ClusterIP
+    port: 8443
+  env:
+    serverSslEnabled: "true"
+    serverPort: "8443"
+    tenantIdentifier: "default"
+    driverSourceClassName: org.mariadb.jdbc.Driver
+  database:
+    existingSecret: fineract-db-credentials
+    keys:
+      host: DB_HOST
+      port: DB_PORT
+      database: DEFAULT_DB
+      username: DB_USER
+      password: DB_PASSWORD
+      tenantsJdbcUrl: TENANTS_JDBC_URL
+  # Add version-specific settings here. Use valueFrom.secretKeyRef for sensitive data.
+  extraEnv: []
+  readinessProbe:
+    tcpSocket:
+      port: https
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+  livenessProbe:
+    tcpSocket:
+      port: https
+    initialDelaySeconds: 120
+    periodSeconds: 20
+    timeoutSeconds: 1
+    failureThreshold: 3
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 3Gi
+
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: example.invalid/portfolio/mifos-web
+    tag: "0.0.0-example"
+    pullPolicy: IfNotPresent
+  containerPort: 8080
+  service:
+    type: ClusterIP
+    port: 80
+  api:
+    url: https://fineract.example.invalid
+    urls: https://fineract.example.invalid
+    provider: /fineract-provider/api
+    version: /v1
+    actuator: /fineract-provider
+    defaultTenant: "default"
+  extraEnv: []
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 2
+    failureThreshold: 3
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+    initialDelaySeconds: 15
+    periodSeconds: 20
+    timeoutSeconds: 2
+    failureThreshold: 3
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+ingress:
+  enabled: false
+  className: ""
+  api:
+    enabled: true
+    host: fineract.example.invalid
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    tls:
+      - hosts:
+          - fineract.example.invalid
+        secretName: fineract-api-tls
+  frontend:
+    enabled: true
+    host: mifos.example.invalid
+    annotations: {}
+    tls:
+      - hosts:
+          - mifos.example.invalid
+        secretName: mifos-web-tls

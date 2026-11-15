@@ -1,0 +1,14 @@
+Project Atlas Fineract/Mifos release: {{ .Release.Name }}
+
+Check workload status:
+  kubectl get deployments,pods,services -n {{ .Release.Namespace }}
+
+Check API health from within the cluster or through your approved ingress route.
+The chart expects an existing Kubernetes Secret for the Fineract database settings:
+  {{ .Values.api.database.existingSecret }}
+
+Replace the example image repositories and API URL before installing.
+When ingress is enabled, verify that the configured ingress class, DNS and TLS
+Secret resources already exist and are appropriate for your target cluster.
+
+This chart does not install or manage MariaDB.

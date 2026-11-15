@@ -1,0 +1,44 @@
+name: Validate Helm chart
+
+on:
+  push:
+    branches:
+      - docs/sanitised-project-baseline
+    paths:
+      - "helm/**"
+      - ".github/workflows/helm-validation.yml"
+  pull_request:
+    paths:
+      - "helm/**"
+      - ".github/workflows/helm-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  helm:
+    name: Lint and render chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v5
+        with:
+          version: v4.3.1
+
+      - name: Lint chart
+        run: helm lint helm/fineract-mifos
+
+      - name: Render default values
+        run: helm template project-atlas helm/fineract-mifos --namespace project-atlas
+
+      - name: Render development values
+        run: helm template project-atlas helm/fineract-mifos --namespace project-atlas -f helm/fineract-mifos/values/development.yaml
+
+      - name: Render staging values
+        run: helm template project-atlas helm/fineract-mifos --namespace project-atlas -f helm/fineract-mifos/values/staging.yaml
+
+      - name: Render production example values
+        run: helm template project-atlas helm/fineract-mifos --namespace project-atlas -f helm/fineract-mifos/values/production.example.yaml
