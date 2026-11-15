@@ -124,20 +124,26 @@ If permission cannot be obtained, remove or rewrite the material to an independe
 
 ## 4. Secret and Git history scan
 
-A new Gitleaks workflow checks the current push/PR change range and separately scans the commit history reachable from all branches and tags fetched by `actions/checkout` with `fetch-depth: 0`.
+A Gitleaks workflow checks the current push/PR change range and separately scans the commit history reachable from all branches and tags fetched by `actions/checkout` with `fetch-depth: 0`.
 
-The first all-refs scan found **one historical `generic-api-key` candidate across 146 commits / approximately 28.4 MB**. The current-commit/change-range scan reported no findings. The all-refs result was traced to:
+The initial all-refs scan found one historical `generic-api-key` candidate across 146 commits / approximately 28.4 MB. The candidate was traced to:
 - file: `frontend/remittances.module-NQRWOT73.js`;
 - commit: `b9c089177947252af5c6b65e68454911d66d3d22`;
 - line: 1, columns 1856–1908.
 
 Manual source correlation against the exact pinned Mifos revision established this as a **false positive, not a hard-coded API-key value**. The matched span is a property read (`Y.mifosRemittanceApiKey`) from the runtime environment object. The pinned Mifos `src/environments/environment.ts` maps this property to `window.env?.mifosRemittanceApiClientKey || ''`; the tracked runtime template exposes that browser field, and the sanitised NGINX entrypoint forces `MIFOS_REMITTANCE_API_CLIENT_KEY` to an empty string. The scan hit is the identifier/property reference, not a literal key value.
 
-A single fingerprint-specific exception has been added to the repository's `.gitleaksignore` for this exact commit/file/rule/line. No rule-wide or path-wide suppression was added. See [the source mapping in the pinned Mifos environment file](https://github.com/openMF/web-app/blob/4f5be2d5040e37ae26adef023c610028cbf34343/src/environments/environment.ts), [the sanitised frontend entrypoint](../nginx/docker-entrypoint.sh), and the [narrow ignore entry](../.gitleaksignore).
+A single fingerprint-specific exception was added to `.gitleaksignore` for this exact commit/file/rule/line. No rule-wide or path-wide suppression was added. This false positive is now documented and narrowly suppressed.
 
-**Remaining action:** the all-refs scan must pass after this narrow suppression on the final review commit. If any new or different finding appears, investigate it individually; never broaden this exception. Also perform manual checks for customer identifiers, private endpoints, sensitive architecture and personal data: secret scanners cannot detect every disclosure risk.
+**Verified result on the current review commit `5cd6a6239ef2a45bebf2348b8d50a86e67f50ce6`:**
+- [Push all-refs Gitleaks scan #21](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728669543) — passed.
+- [PR all-refs Gitleaks scan #22](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728674494) — passed.
+- [Latest Helm/Kubernetes PR run #73](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728674509) — passed.
+- [Latest Mifos frontend PR run #35](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions/runs/43728674520) — passed.
 
-The workflow run status and redacted metadata are available from [GitHub Actions](https://github.com/Davintus/project-atlas-kubernetes-deployment/actions).
+See [the source mapping in the pinned Mifos environment file](https://github.com/openMF/web-app/blob/4f5be2d5040e37ae26adef023c610028cbf34343/src/environments/environment.ts), [the sanitised frontend entrypoint](../nginx/docker-entrypoint.sh), and the [narrow ignore entry](../.gitleaksignore).
+
+The Gitleaks history gate is therefore technically passed for the current review commit, subject to the exact exception remaining narrow. It does not prove there is no customer disclosure, personal data, trademark infringement or secret outside Gitleaks' detection patterns. Manual disclosure and artifact reviews remain required.
 
 ## 5. Required sign-offs before changing repository visibility
 
